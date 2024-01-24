@@ -1,2 +1,5 @@
 # ignore ALL .gz files
 *.gz
+
+# ignore enwik9 as it's too large
+enwik9
