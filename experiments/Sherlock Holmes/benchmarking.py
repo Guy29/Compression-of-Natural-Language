@@ -49,10 +49,11 @@ compression_methods['LZMA']    = Codec(zipper(zipfile.ZIP_LZMA), unzip_)
 
 # ---------------------------
 
-import zlib, lzma, gzip
+import zlib, lzma, gzip, bz2
 compression_methods['lzma_lib'] = Codec(lzma.compress, lzma.decompress)
 compression_methods['zlib_lib'] = Codec(zlib.compress, zlib.decompress)
 compression_methods['gzip_lib'] = Codec(gzip.compress, gzip.decompress)
+compression_methods[ 'bz2_lib'] = Codec( bz2.compress,  bz2.decompress)
 
 # ---------------------------
 
