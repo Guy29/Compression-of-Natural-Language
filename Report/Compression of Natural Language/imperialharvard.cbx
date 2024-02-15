@@ -1,0 +1,24 @@
+\ProvidesFile{imperialharvard.cbx}
+[\abx@cbxid]
+
+\RequireCitationStyle{authoryear}
+
+\ExecuteBibliographyOptions{
+	labeldateparts,
+	uniquename=init,
+	giveninits=true,
+	uniquelist=false,
+	autocite=inline
+	}
+
+%%%%%%%%Format in-text citations%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand*{\nameyeardelim}{\addcomma\addspace}
+\renewcommand*{\finalnamedelim}{\addspace\&\space}
+\renewcommand{\labelnamepunct}{\addspace}
+
+%%%%%%%%Formats DOI entries%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand*{\mkbibacro}[1]{%
+  \csundef{\f@encoding/mdbch/\f@series/sc}%
+  \ifcsundef{\f@encoding/\f@family/\f@series/sc}
+    {#1}
+    {\texttt{\MakeUppercase{#1}}}}

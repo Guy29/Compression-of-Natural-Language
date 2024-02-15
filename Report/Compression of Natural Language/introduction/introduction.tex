@@ -1,0 +1,68 @@
+\chapter{Introduction}
+
+Human language contains many redundancies and regularities. It is possible, for example, for a person to infer from an incomplete sentence a missing letter or word, or to spot an error through an inconsistency between text and context.
+
+This is done, first, through the abstraction of an underlying, concise representation of the text, and then through a re-generation of the elaborated text from the conceptual understanding. In humans, one's ability to induce a general pattern and deduce its application to a specific case in this way is often an indication of their comprehension of a text, of having a grasp of the underlying meaning.
+
+Because of this, it is believed by some researchers (most notably Marcus Hutter) that the ideal lossless compression of a text would require comprehension, and that the first is therefore an AI-complete problem.
+
+To encourage research into this hypothesis, Hutter created the Hutter Prize in 2006, which rewards data compression improvements on a specific 1 GB text file, titled enwik9, which is extracted from the English Wikipedia.
+This project will be a study of this text compression challenge, and the approaches taken by the record-holders.
+
+\section{Section Example}
+\lipsum[1]
+\subsection{Subsection Example}
+\label{subsection:example}
+\lipsum[1]
+\subsubsection{Subsubsection Example}
+
+Note that you can reference chapters, sections, subsections and subsubsections. For example: Subsection \ref{subsection:example}
+
+\section{Math Example}
+
+\[
+\textrm{score}(x) = \left(\lambda_m\sum_{i=0}^{|\mathbf{m}|} \log \hat{p}_m(d(x, \mathbf{m}_i) \mid l_i)\right) + \left(\lambda_l\sum_{i=0}^{|\mathbf{l}|} \log\hat{p}_l(d(x, \mathbf{l}_i) \mid \mathbf{v}_i)\right) + \lambda_p \hat{p}_p(x)
+\]
+
+\section{Algorithm Example}
+
+See Algorithm \ref{algorithm:posit}
+
+\begin{algorithm}[]
+\SetAlgoLined
+\SetKwInOut{KwInput}{Input}
+\SetKwInOut{KwOutput}{Output}
+\SetKwInOut{KwPre}{Pre}
+\SetKw{Return}{return}
+\SetKwProg{Fn}{Function}{}{end}
+\LinesNumbered
+\KwInput{$\textbf{m}$, such that $\mathbf{m}_i$ is the position of the $i$'th monitor\newline
+$\textbf{l}$, such that $\mathbf{l}_i$ is the position of the $i$'th landmark\newline
+$\mathbf{p}^m$, such that $\mathbf{p}^m_i$ is the ping latency from monitor $i$ to the target\newline
+$\mathbf{p}^l$, such that $\mathbf{p}^l_i$ is the set of ping latencies to landmark $i$}
+
+\BlankLine
+\KwPre{Compute $\hat{p}_m(d \mid l)$, an estimator giving the likelihood of the target being distance $d$ away from the monitor, given that the monitor records a latency of $l$ to that target. Implemented by training a KDE using $\mathbf{p}^l$.\newline
+Compute $\hat{p}_l(d \mid v)$, an estimator giving the likelihood of the target being distance $d$ away from the landmark, given a Canberra distance of $v$ between the target and the landmark, using training targets.
+}
+\BlankLine
+\KwOutput{Most likely location of the target}
+\BlankLine
+
+\Fn{Likelihood($x$, $\mathbf{v}$)} {
+MonitorScore $\gets \sum_{i=0}^{|\mathbf{m}|} \log{\hat{p}_m(d(x, \mathbf{m}_i) \mid l_i)}$\;
+LandmarkScore $\gets \sum_{i=0}^{|\mathbf{l}|} \log{\hat{p}_l(d(x, \mathbf{l}_i) \mid \mathbf{v}_i)}$\;
+\Return MonitorScore + LandmarkScore
+}
+
+\BlankLine
+$\mathbf{v} \gets $\{$\mathrm{canberra\_distance}(\mathbf{l}_i, \mathbf{p}^m) \mid \mathbf{l}_i \in \mathbf{l}$\}
+
+$\mathbf{C}$ $\gets$ Constraint-Based-Geolocation($\mathbf{m}$, $\mathbf{p}^m$)\;
+$\mathbf{C_l}$ $\gets$ \{$m \in \mathbf{m} \mid \mathbf{C}$ contains $m\} \cup \{l \in \mathbf{l} \mid \mathbf{C}$ contains $l$\}\;
+\BlankLine
+\Return argmax$_{x\in \mathbf{C_l}}$ Likelihood($x$)
+
+ \caption{Algorithm example}
+ \label{algorithm:posit}
+\end{algorithm}
