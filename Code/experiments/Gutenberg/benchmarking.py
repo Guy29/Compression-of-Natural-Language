@@ -1,3 +1,6 @@
+import os
+import pandas as pd
+
 class Codec:
   def __init__(self, encoder, decoder):
     self.encode = encoder
@@ -9,8 +12,6 @@ class Codec:
     correct = (decoded == original)
     compression_ratio = len(encoded) / len(original)
     return (correct, len(encoded), compression_ratio)
-
-text = open('arthur-conan-doyle_the-adventures-of-sherlock-holmes.txt','rb+').read()
 
 compression_methods = {}
 
@@ -57,7 +58,14 @@ compression_methods[ 'bz2_lib'] = Codec( bz2.compress,  bz2.decompress)
 
 # ---------------------------
 
-import pandas as pd
+texts = []
+
+for book_filename in os.listdir('books'):
+  with open('books/'+book_filename,'rb+') as book:
+    texts.append(book.read())
+
+text = b'---NEW BOOK---'.join(texts)
+
 
 rows = [(method_name, *method.evaluate_on(text)) for method_name, method in compression_methods.items()]
 rows.sort(key = lambda r: r[2])
