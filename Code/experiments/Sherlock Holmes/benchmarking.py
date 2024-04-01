@@ -7,7 +7,7 @@ class Codec:
     encoded = self.encode(original)
     decoded = self.decode(encoded)
     correct = (decoded == original)
-    compression_ratio = len(encoded) / len(original)
+    compression_ratio = len(original) / len(encoded)
     return (correct, len(encoded), compression_ratio)
 
 text = open('arthur-conan-doyle_the-adventures-of-sherlock-holmes.txt','rb+').read()
