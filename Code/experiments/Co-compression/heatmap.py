@@ -11,21 +11,11 @@ with open('stats.json','r') as f:
 
 # Load the CSV file
 file_path = 'similarity.csv'
-similarity_matrix = pd.read_csv(file_path)
+similarity_matrix = pd.read_csv(file_path, index_col=0)
 
 
 # Get a dict copy of the data
-
-def sane_dict_format(pd_dataframe):
-  temp_dict = pd_dataframe.to_dict()
-  out_dict = {}
-  for i,bk1 in enumerate(temp_dict['Books'].values()):
-    out_dict[bk1] = {}
-    for j,bk2 in list(enumerate(pd_dataframe.columns))[1:]:
-      out_dict[bk1][bk2] = temp_dict[bk2][i]
-  return out_dict
-
-similarity_dict = sane_dict_format(similarity_matrix)
+similarity_dict = similarity_matrix.to_dict()
   
 
 # Put all similarity scores into one list
@@ -57,13 +47,14 @@ bottom = [(score,title(bk1),title(bk2)) for (score,bk1,bk2) in different_book_sc
 df = pd.DataFrame(top + [('...',)*3] + bottom, columns=['Score', 'Book 1', 'Book 2'])
 print(df.to_string(index=False))
 
+# Rename the columns in rows in the matrix from book filenames to the corresponding abbreviated book titles
+similarity_matrix = similarity_matrix.rename(columns=stats['abbreviated_book_titles'], index=stats['abbreviated_book_titles'])
 
 # Creating the heatmap
-similarity_matrix.set_index('Books', inplace=True)
 plt.figure(figsize=(20, 15))
 heatmap = sns.heatmap(similarity_matrix, cmap='viridis')
-plt.title('Book Similarity Heatmap', fontsize=20)
+plt.title('Book Similarity', fontsize=20)
 plt.xticks(fontsize=8)
 plt.yticks(fontsize=8)
-#plt.show()
-plt.savefig('fig_2.png')
+plt.show()
+#plt.savefig('fig_2.png')

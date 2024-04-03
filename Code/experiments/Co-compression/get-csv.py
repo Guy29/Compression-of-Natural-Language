@@ -25,6 +25,8 @@ matrix = [columns]
 
 # Iterate over pairs of books, filling out the matrix
 for book_name in book_names:
+
+  book_compressed_size = stats['single_book_compression_sizes'][book_name]['lzma']
   
   try:
 
@@ -38,10 +40,13 @@ for book_name in book_names:
           pair_compression_size = stats['book_pair_compression_sizes'][other_book_name][book_name]['lzma']
         else:
           raise Exception(book_name + ', ' + other_book_name)
+          
+        other_book_compressed_size = stats['single_book_compression_sizes'][other_book_name]['lzma']
         
-        factor = (pair_compression_size - stats['single_book_compression_sizes'][book_name]['lzma']) / stats['single_book_compression_sizes'][other_book_name]['lzma']
+        additional_information = (pair_compression_size - book_compressed_size) / other_book_compressed_size
+        similarity = 1 - additional_information
         
-        row.append(factor)
+        row.append(similarity)
     
   except KeyError: continue
   
