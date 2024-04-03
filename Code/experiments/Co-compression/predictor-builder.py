@@ -1,7 +1,9 @@
 import os
 from lzma import compress
 
-targets = ['books/'+filename for filename in os.listdir('books')]
+books_location = '../../../Data/books/'
+
+targets = [books_location+filename for filename in os.listdir('books')]
 
 # Function to return the size of a file given its name
 def file_size(filename):

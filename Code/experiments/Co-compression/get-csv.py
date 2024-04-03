@@ -4,6 +4,8 @@
 
 import json
 
+books_location = '../../../Data/books/'
+
 # Load book compression stats
 with open('stats.json','r') as f:
   stats = json.load(f)
@@ -15,7 +17,7 @@ def file_size(filename):
 
 # Load the book file names and sort them by size of file
 book_names = list(stats['single_book_compression_sizes'].keys())
-book_names.sort(key = lambda fname: file_size('books/'+fname))
+book_names.sort(key = lambda fname: file_size(books_location + fname))
 
 # Matrix column names
 columns = ['Books'] + book_names
