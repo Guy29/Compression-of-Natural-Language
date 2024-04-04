@@ -83,7 +83,7 @@ class Stats:
   def save_data(self, filename):
     # Save the updated stats  
     with open(filename,'w+') as f:
-      json.dump(self.stats, f, indent=2)
+      json.dump(self.stats, f, indent=2, ensure_ascii=False)
   
   def update_all_and_save(self):
     self.update_book_filenames()
@@ -92,7 +92,7 @@ class Stats:
     self.update_pair_compression_sizes()
     self.save_data(self.source_filename)
     
-  def compute_similarity_matrix(self):
+  def compute_similarity_matrix(self, sort_by='file size'):
     # This method will read stats and create a similarity
     #   matrix for pairs of books.
 
@@ -113,48 +113,35 @@ class Stats:
       similarity             = 1 - additional_information
     
       matrix.at[book1_fname, book2_fname] = similarity
-
-    sorted_book_filenames = sorted(self.book_filenames, key = lambda fname: file_size(books_location + fname))
-    matrix = matrix.loc[sorted_book_filenames[::-1], sorted_book_filenames]
+      
     matrix = matrix.infer_objects(copy=False)
     self.similarity_matrix = matrix
-
-    """
-
-    def median(l): l2=sorted(l); return l2[len(l2)//2]
-
-    def transpose(matrix):
-      out = [[None]*len(matrix) for i in range(len(matrix[0]))]
-      for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-          out[j][i] = matrix[i][j]
-      return out
-
-
-    predictiveness = {bk_name: median([matrix[i][j] for j in range(1,len(matrix))]) for i,bk_name in enumerate(book_names,start=1)}
-    matrix[1:] = sorted(matrix[1:], key = lambda row: predictiveness[row[0]])
-
-    predictability = {bk_name: median([matrix[i][j] for i in range(1,len(matrix))]) for j,bk_name in enumerate(book_names,start=1)}
-    matrix = transpose(matrix)
-    matrix[1:] = sorted(matrix[1:], key = lambda row: predictability[row[0]])
-    matrix = transpose(matrix)
-
-    """
     
-  def draw_similarity_heatmap(self):
+  def draw_similarity_heatmap(self, sort_by, filename):
+
+    matrix = m = self.similarity_matrix
+    
+    # Sort rows and columns of the similarity matrix
+    if   sort_by == 'file size':
+      sorted_book_filenames = sorted(self.book_filenames, key = lambda fname: file_size(books_location + fname))
+      matrix = matrix.loc[sorted_book_filenames[::-1], sorted_book_filenames]
+    elif sort_by == 'median':
+      matrix = m[m.median(axis=0).sort_values().index].loc[m.median(axis=1).sort_values().index]
+      matrix = matrix.iloc[::-1,::-1]
 
     # Rename the columns in rows in the matrix from book filenames to the corresponding abbreviated book titles
-    similarity_matrix = self.similarity_matrix.rename(
-                            columns = self.stats['abbreviated_book_titles'],
-                            index   = self.stats['abbreviated_book_titles'])
+    matrix = matrix.rename(
+                      columns = self.stats['abbreviated_book_titles'],
+                      index   = self.stats['abbreviated_book_titles'])
 
     # Creating the heatmap
     plt.figure(figsize=(20, 15))
-    heatmap = sns.heatmap(similarity_matrix, cmap='viridis')
+    heatmap = sns.heatmap(matrix, cmap='viridis')
     plt.title('Book Similarity', fontsize=20)
-    plt.xticks(fontsize=8)
-    plt.yticks(fontsize=8)
-    plt.show()
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
+    #plt.show()
+    plt.savefig(filename, bbox_inches='tight', pad_inches=0)
   
   def print_most_least_similar(self):
     # Get a dict copy of the data
@@ -180,5 +167,6 @@ class Stats:
 S = Stats('stats.json')
 S.update_all_and_save()
 S.compute_similarity_matrix()
-#S.draw_similarity_heatmap()
+S.draw_similarity_heatmap(sort_by='file size', filename='fig_co-compression_file_size.png')
+S.draw_similarity_heatmap(sort_by='median', filename='fig_co-compression_median.png')
 S.print_most_least_similar()
