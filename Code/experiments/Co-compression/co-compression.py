@@ -141,7 +141,7 @@ class Stats:
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
     #plt.show()
-    plt.savefig(filename, bbox_inches='tight', pad_inches=0)
+    plt.savefig(filename, dpi=300, bbox_inches='tight', pad_inches=0)
   
   def print_most_least_similar(self):
     # Get a dict copy of the data
