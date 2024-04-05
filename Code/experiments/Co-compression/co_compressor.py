@@ -26,4 +26,4 @@ class CoCompressor:
     # Find the overlap with compressed_prefix
     for i in range(len(compressed_total)):
       if compressed_total[i] != self.compressed_prefix[i]: break
-    return (i,compressed_total[i:])
+    return i.to_bytes(4) + compressed_total[i:]

@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from itertools import combinations_with_replacement, product
 import zlib, lzma, gzip, bz2
+from co_compressor import CoCompressor
 
 
 
@@ -21,6 +22,8 @@ def file_size(filename):
   with open(filename,'rb+') as f:
     return f.seek(0,2)
 
+# Function that returns a recursive defaultdict
+def d(): return collections.defaultdict(d)
 
 class Stats:
   
@@ -31,7 +34,6 @@ class Stats:
       with open(filename) as f:
         self.stats = json.load(f)
     except FileNotFoundError:
-      def d(): return collections.defaultdict(d)
       self.stats = d()
   
   def update_book_filenames(self):
@@ -70,6 +72,23 @@ class Stats:
           with open(self.stats['books_location']+book_name1,'rb+') as bk1, open(self.stats['books_location']+book_name2,'rb+') as bk2:
             self.stats['book_pair_compression_sizes'][book_name1][book_name2][lib_name] = \
               len(compression_method.compress(bk1.read()+bk2.read()))
+  
+  def update_cocompressor_performance(self):
+    cocompressor_performance = d()
+    # Iterate over books
+    for fname1 in self.book_filenames[:2]:
+      # Train a compressor on the current book
+      compressor = CoCompressor([f"{self.stats['books_location']}{fname1}"], compressor = lzma)
+
+      # Iterate over books
+      for fname2 in self.book_filenames[:2]:
+        with open(f"{self.stats['books_location']}{fname2}",'rb') as f:
+          text = f.read()
+        compressed_size = len(compressor.compress(text))
+        independently_compressed_size = self.stats['single_book_compression_sizes'][fname2]['lzma']
+        cocompressor_performance[fname1][fname2] = {'compressed_size': compressed_size, 'ratio': independently_compressed_size/compressed_size}
+    
+    self.stats['cocompressor_performance'] = cocompressor_performance
 
   def save_data(self, filename):
     # Save the updated stats  
@@ -81,6 +100,7 @@ class Stats:
     self.update_book_titles()
     self.update_single_compression_sizes()
     self.update_pair_compression_sizes()
+    #self.update_cocompressor_performance()
     self.save_data(self.source_filename)
     
   def compute_similarity_matrix(self):
@@ -153,3 +173,4 @@ class Stats:
     # Display them
     df = pd.DataFrame(top + [('...',)*3] + bottom, columns=['Score', 'Book 1', 'Book 2'])
     print(df.to_string(index=False))
+    
