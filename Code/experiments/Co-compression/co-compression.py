@@ -1,20 +1,13 @@
-# Running this script will update "stats.json" with new data
-#   about the available books saved in "../../../Data/books", what the compressed
-#   size of each is (using different compression algorithms) as well
-#   as the sizes of the co-compressions of pairs of books.
-
 import os, json, collections
-
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 from itertools import combinations_with_replacement, product
-
 import zlib, lzma, gzip, bz2
 
 
 books_location = '../../../Data/books/'
+
 
 # NonCompressor class returns data without compression
 class NonCompressor:
@@ -92,7 +85,7 @@ class Stats:
     self.update_pair_compression_sizes()
     self.save_data(self.source_filename)
     
-  def compute_similarity_matrix(self, sort_by='file size'):
+  def compute_similarity_matrix(self):
     # This method will read stats and create a similarity
     #   matrix for pairs of books.
 
