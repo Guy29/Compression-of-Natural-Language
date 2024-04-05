@@ -1,4 +1,5 @@
 {
+  "books_location": "../../../Data/books/",
   "book_titles": {
     "pg10.txt": "The King James Version of the Bible",
     "pg100.txt": "The Complete Works of William Shakespeare",

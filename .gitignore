@@ -4,3 +4,6 @@
 # ignore enwik9 and enwik9.xml as they're too large
 enwik9
 enwik9.xml
+
+# ignore all __pycache__ folders
+__pycache__/

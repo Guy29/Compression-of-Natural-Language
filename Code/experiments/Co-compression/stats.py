@@ -6,8 +6,6 @@ from itertools import combinations_with_replacement, product
 import zlib, lzma, gzip, bz2
 
 
-books_location = '../../../Data/books/'
-
 
 # NonCompressor class returns data without compression
 class NonCompressor:
@@ -38,13 +36,13 @@ class Stats:
   
   def update_book_filenames(self):
     # Load list of existing book files
-    self.book_filenames = os.listdir(books_location)
+    self.book_filenames = os.listdir(self.stats['books_location'])
   
   def update_book_titles(self):
     # Iterate over books in books_location and store book titles corresponding to file names
     for book_name in self.book_filenames:
       if book_name not in self.stats['book_titles']:
-        with open(books_location + book_name,'rb') as bk:
+        with open(self.stats['books_location'] + book_name,'rb') as bk:
           title = bk.read(200).split(b'\r')[0].split(b'eBook of ')[-1].decode()
         self.stats['book_titles'][book_name] = title
 
@@ -59,7 +57,7 @@ class Stats:
       # ... for each compression algorithm you know
       for lib_name,compression_method in libs_dict.items():
         if lib_name not in self.stats['single_book_compression_sizes'][book_name]:
-          with open(books_location + book_name,'rb+') as bk:
+          with open(self.stats['books_location'] + book_name,'rb+') as bk:
             self.stats['single_book_compression_sizes'][book_name][lib_name] = \
               len(compression_method.compress(bk.read()))
 
@@ -69,7 +67,7 @@ class Stats:
       # Add the size of their co-compression to the stats
       for lib_name,compression_method in libs_dict.items():
         if lib_name not in self.stats['book_pair_compression_sizes'][book_name1][book_name2]:
-          with open(books_location+book_name1,'rb+') as bk1, open(books_location+book_name2,'rb+') as bk2:
+          with open(self.stats['books_location']+book_name1,'rb+') as bk1, open(self.stats['books_location']+book_name2,'rb+') as bk2:
             self.stats['book_pair_compression_sizes'][book_name1][book_name2][lib_name] = \
               len(compression_method.compress(bk1.read()+bk2.read()))
 
@@ -116,7 +114,7 @@ class Stats:
     
     # Sort rows and columns of the similarity matrix
     if   sort_by == 'file size':
-      sorted_book_filenames = sorted(self.book_filenames, key = lambda fname: file_size(books_location + fname))
+      sorted_book_filenames = sorted(self.book_filenames, key = lambda fname: file_size(self.stats['books_location'] + fname))
       matrix = matrix.loc[sorted_book_filenames[::-1], sorted_book_filenames]
     elif sort_by == 'median':
       matrix = m[m.median(axis=0).sort_values().index].loc[m.median(axis=1).sort_values().index]
@@ -155,11 +153,3 @@ class Stats:
     # Display them
     df = pd.DataFrame(top + [('...',)*3] + bottom, columns=['Score', 'Book 1', 'Book 2'])
     print(df.to_string(index=False))
-
-
-S = Stats('stats.json')
-S.update_all_and_save()
-S.compute_similarity_matrix()
-S.draw_similarity_heatmap(sort_by='file size', filename='fig_co-compression_file_size.png')
-S.draw_similarity_heatmap(sort_by='median', filename='fig_co-compression_median.png')
-S.print_most_least_similar()
