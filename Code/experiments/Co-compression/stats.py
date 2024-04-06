@@ -1,11 +1,12 @@
 import os, json, collections
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from collections import defaultdict
-from itertools import combinations_with_replacement, product
-from math import log
 import zlib, lzma, gzip, bz2
+import pandas            as pd
+import seaborn           as sns
+import matplotlib.pyplot as plt
+from collections   import defaultdict
+from itertools     import combinations_with_replacement, product
+from math          import log
+from statistics    import median, variance
 from co_compressor import CoCompressor
 
 
@@ -173,6 +174,7 @@ class Stats:
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
     plt.savefig(filename, dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.close()
     
   def draw_similarity_heatmap(self, sort_by, filename):
     self.draw_heatmap(self.similarity_matrix, 'Book similarity', sort_by, filename)
@@ -199,4 +201,37 @@ class Stats:
     # Display them
     df = pd.DataFrame(top + [('...',)*3] + bottom, columns=['Score', 'Book 1', 'Book 2'])
     print(df.to_string(index=False))
+  
+  def draw_cocomp_performance(self, filename):
+  
+    performances = {}
+    for title in self.book_filenames:
+      ratios = [stats['ratio'] for text,stats in self.stats['cocompressor_performance'][title].items()]
+      performances[self.stats['abbreviated_book_titles'][title]] = sorted(ratios, reverse=True)
     
+    median_performance = sorted(performances, key=lambda title: median(performances[title]), reverse=True)
+    extreme_median_performances = median_performance[:3]+median_performance[-3:]
+    
+    all_titles = set(self.stats['abbreviated_book_titles'].values())
+
+    plt.figure(figsize=(10, 6))
+    
+    for title in all_titles - set(extreme_median_performances):
+      plt.plot(performances[title], color='#aaa', linestyle='dotted')
+    for title in extreme_median_performances:
+      plt.plot(performances[title], label=title)
+    
+    plt.xticks([])
+    plt.grid(axis='y', linestyle='--')
+
+    plt.xlim(2, 96)
+    plt.ylim(0.7, 1.3)
+
+    plt.legend()
+    plt.xlabel('Texts sorted by ease of compression')
+    plt.ylabel('Co-compressor performance compared to LZMA')
+    plt.title('Co-compressor performances')
+
+    #plt.show()
+    plt.savefig(filename, dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.close()
