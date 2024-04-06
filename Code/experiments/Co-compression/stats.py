@@ -2,6 +2,7 @@ import os, json, collections
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from collections import defaultdict
 from itertools import combinations_with_replacement, product
 import zlib, lzma, gzip, bz2
 from co_compressor import CoCompressor
@@ -22,8 +23,16 @@ def file_size(filename):
   with open(filename,'rb+') as f:
     return f.seek(0,2)
 
-# Function that returns a recursive defaultdict
-def d(): return collections.defaultdict(d)
+
+# Function that returns an empty recursive defaultdict
+def rdd(): return defaultdict(rdd)
+
+
+# Function that converts and existing dict to a recursive defaultdict
+def to_rdd(d):
+  return defaultdict(rdd,{k:(to_rdd(v) if isinstance(v,dict) else v) for k,v in d.items()})
+
+
 
 class Stats:
   
@@ -34,7 +43,8 @@ class Stats:
       with open(filename) as f:
         self.stats = json.load(f)
     except FileNotFoundError:
-      self.stats = d()
+      self.stats = {}
+    self.stats = to_rdd(self.stats)
   
   def update_book_filenames(self):
     # Load list of existing book files
@@ -74,21 +84,20 @@ class Stats:
               len(compression_method.compress(bk1.read()+bk2.read()))
   
   def update_cocompressor_performance(self):
-    cocompressor_performance = d()
     # Iterate over books
     for fname1 in self.book_filenames[:2]:
-      # Train a compressor on the current book
-      compressor = CoCompressor([f"{self.stats['books_location']}{fname1}"], compressor = lzma)
+      # Placeholder for a compressor trained on the current book
+      compressor = None
 
       # Iterate over books
       for fname2 in self.book_filenames[:2]:
+        if self.stats['cocompressor_performance'][fname1][fname2]: continue
+        if not compressor: compressor = CoCompressor([f"{self.stats['books_location']}{fname1}"], compressor = lzma)
         with open(f"{self.stats['books_location']}{fname2}",'rb') as f:
           text = f.read()
         compressed_size = len(compressor.compress(text))
         independently_compressed_size = self.stats['single_book_compression_sizes'][fname2]['lzma']
-        cocompressor_performance[fname1][fname2] = {'compressed_size': compressed_size, 'ratio': independently_compressed_size/compressed_size}
-    
-    self.stats['cocompressor_performance'] = cocompressor_performance
+        self.stats['cocompressor_performance'][fname1][fname2] = {'compressed_size': compressed_size, 'ratio': independently_compressed_size/compressed_size}
 
   def save_data(self, filename):
     # Save the updated stats  
@@ -100,7 +109,7 @@ class Stats:
     self.update_book_titles()
     self.update_single_compression_sizes()
     self.update_pair_compression_sizes()
-    #self.update_cocompressor_performance()
+    self.update_cocompressor_performance()
     self.save_data(self.source_filename)
     
   def compute_similarity_matrix(self):
@@ -151,7 +160,6 @@ class Stats:
     plt.title('Book Similarity', fontsize=20)
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
-    #plt.show()
     plt.savefig(filename, dpi=300, bbox_inches='tight', pad_inches=0)
   
   def print_most_least_similar(self):
