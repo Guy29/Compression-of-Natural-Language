@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from itertools import combinations_with_replacement, product
+from math import log
 import zlib, lzma, gzip, bz2
 from co_compressor import CoCompressor
 
@@ -142,17 +143,22 @@ class Stats:
       
     matrix = matrix.infer_objects(copy=False)
     self.similarity_matrix = matrix
+  
+  def compute_cocomp_matrix(self):
+    matrix = pd.DataFrame(columns = self.book_filenames, index = self.book_filenames)
+    for fname1,fname2 in product(self.book_filenames, repeat=2):
+      matrix.at[fname1, fname2] = log(self.stats['cocompressor_performance'][fname1][fname2]['ratio'])
+    matrix = matrix.infer_objects(copy=False)
+    self.cocomp_matrix = matrix
     
-  def draw_similarity_heatmap(self, sort_by, filename):
-
-    matrix = m = self.similarity_matrix
+  def draw_heatmap(self, matrix, title, sort_by, filename):
     
-    # Sort rows and columns of the similarity matrix
+    # Sort rows and columns of the matrix
     if   sort_by == 'file size':
       sorted_book_filenames = sorted(self.book_filenames, key = lambda fname: file_size(self.stats['books_location'] + fname))
       matrix = matrix.loc[sorted_book_filenames[::-1], sorted_book_filenames]
     elif sort_by == 'median':
-      matrix = m[m.median(axis=0).sort_values().index].loc[m.median(axis=1).sort_values().index]
+      matrix = matrix[matrix.median(axis=0).sort_values().index].loc[matrix.median(axis=1).sort_values().index]
       matrix = matrix.iloc[::-1,::-1]
 
     # Rename the columns in rows in the matrix from book filenames to the corresponding abbreviated book titles
@@ -163,10 +169,16 @@ class Stats:
     # Creating the heatmap
     plt.figure(figsize=(20, 15))
     heatmap = sns.heatmap(matrix, cmap='viridis')
-    plt.title('Book Similarity', fontsize=20)
+    plt.title(title, fontsize=20)
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
     plt.savefig(filename, dpi=300, bbox_inches='tight', pad_inches=0)
+    
+  def draw_similarity_heatmap(self, sort_by, filename):
+    self.draw_heatmap(self.similarity_matrix, 'Book similarity', sort_by, filename)
+    
+  def draw_cocomp_heatmap(self, sort_by, filename):
+    self.draw_heatmap(self.cocomp_matrix, 'CoCompressor similarity', sort_by, filename)
   
   def print_most_least_similar(self):
     # Get a dict copy of the data
