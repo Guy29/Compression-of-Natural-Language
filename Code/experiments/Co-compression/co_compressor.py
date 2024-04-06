@@ -3,20 +3,12 @@ import zlib, lzma, gzip, bz2
 
 class CoCompressor:
   
-  def __init__(self, filenames, compressor = lzma):
-    self.filenames  = filenames
+  def __init__(self, basis, compressor = lzma):
+    self.uncompressed_prefix  = basis
     self.compressor = compressor
     self.train()
   
   def train(self):
-    # Concatenate the contents of the input texts
-    self.uncompressed_prefix = []
-    for fname in self.filenames:
-      with open(fname, 'rb') as f:
-        self.uncompressed_prefix.append(f.read())
-    self.uncompressed_prefix = b''.join(self.uncompressed_prefix)
-    
-    # Compress them
     self.compressed_prefix = self.compressor.compress(self.uncompressed_prefix)
     
   def compress(self, byte_data):
@@ -27,3 +19,11 @@ class CoCompressor:
     for i in range(len(compressed_total)):
       if compressed_total[i] != self.compressed_prefix[i]: break
     return i.to_bytes(4) + compressed_total[i:]
+  
+  def decompress(self, compressed_byte_data):
+    i = int.from_bytes(compressed_byte_data[:4])
+    c = compressed_byte_data[4:]
+    compressed_total = self.compressed_prefix[:i] + c
+    total = self.compressor.decompress(compressed_total)
+    byte_data = total[len(self.uncompressed_prefix):]
+    return byte_data

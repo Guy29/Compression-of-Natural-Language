@@ -85,14 +85,20 @@ class Stats:
   
   def update_cocompressor_performance(self):
     # Iterate over books
-    for fname1 in self.book_filenames[:2]:
+    for fname1 in self.book_filenames:
       # Placeholder for a compressor trained on the current book
       compressor = None
 
       # Iterate over books
-      for fname2 in self.book_filenames[:2]:
+      for fname2 in self.book_filenames:
+        
         if self.stats['cocompressor_performance'][fname1][fname2]: continue
-        if not compressor: compressor = CoCompressor([f"{self.stats['books_location']}{fname1}"], compressor = lzma)
+        
+        if not compressor:
+          with open(f"{self.stats['books_location']}{fname1}",'rb+') as f:
+            compressor_basis = f.read()
+          compressor = CoCompressor(compressor_basis, compressor = lzma)
+        
         with open(f"{self.stats['books_location']}{fname2}",'rb') as f:
           text = f.read()
         compressed_size = len(compressor.compress(text))
