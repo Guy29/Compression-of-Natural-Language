@@ -173,7 +173,7 @@ class Stats:
     plt.title(title, fontsize=20)
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
-    plt.savefig(filename, dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.savefig(filename, dpi=150, bbox_inches='tight', pad_inches=0)
     plt.close()
     
   def draw_similarity_heatmap(self, sort_by, filename):
@@ -233,5 +233,5 @@ class Stats:
     plt.title('Co-compressor performances')
 
     #plt.show()
-    plt.savefig(filename, dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.savefig(filename, dpi=150, bbox_inches='tight', pad_inches=0)
     plt.close()
