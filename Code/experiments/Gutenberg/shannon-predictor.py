@@ -99,7 +99,7 @@ class Predictor:
 #############################################################
 
 
-war_and_peace = open('books/pg2600.txt','rb+').read()
+war_and_peace = open('../../../Data/books/pg2600.txt','rb+').read()
 
 war_and_peace_predictor = Predictor(war_and_peace, window=5)
 
@@ -115,7 +115,7 @@ for i in range(20):
 # Use the predictor trained on War and Peace to compress
 #   The Count of Monte Cristo
 
-monte_cristo = open('books/pg1184.txt','rb+').read()
+monte_cristo = open('../../../Data/books/pg1184.txt','rb+').read()
 
 t0 = time()
 compressed_monte_cristo = war_and_peace_predictor.encode(monte_cristo)
