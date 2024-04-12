@@ -49,7 +49,7 @@ print()
 words = text.split()
 
 table = [(n, n_gram_entropy(tuple(words),n), marginal_entropy(tuple(words),n)) for n in range(1,11)]
-df    = pd.DataFrame(table, columns=['N', 'N-gram entropy', 'Marginal entropy'])
+df    = pd.DataFrame(table, columns=['N', 'N-word entropy', 'Marginal entropy'])
 print(df.to_string(index=False))
 
 
@@ -94,7 +94,7 @@ Text length: 77955344
  9       21.517189          1.253159
 10       22.574182          1.056994
 
- N  N-gram entropy  Marginal entropy
+ N  N-word entropy  Marginal entropy
  1       11.477039         11.477039
  2       18.702746          7.225707
  3       22.187337          3.484592
