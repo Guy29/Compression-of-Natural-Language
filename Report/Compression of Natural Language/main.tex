@@ -21,6 +21,12 @@
 
 \usepackage{titlesec}
 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{multirow}
+
+\usepackage{subcaption}
+
 % Listings (for displaying code):
 \usepackage{listings}
 \lstset{
@@ -133,6 +139,10 @@ linecolor=gray!40,
 
 \bibliography{bibs/bibliography.bib}
 
+\setlength {\marginparwidth }{2cm}
+
+\setcounter{tocdepth}{3}
+
 \begin{document}
 \input{title/title.tex}
 
@@ -154,21 +164,18 @@ linecolor=gray!40,
   {\thechapter.} % label (chapter number)
   {1em} % separation between label and title
   {} % before-code
+\titlespacing*{\chapter}{0pt}{0pt}{15pt}
+
+%\makeatletter
+%\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+%\makeatother
 
 
 % Inputs:
 % Uncomment or add folders to add your own chapters and input files.
 
-\input{introduction/introduction.tex}
-\input{introduction/template-introduction.tex}
-\input{background/background.tex}
-% \input{project_plan/project_plan.tex}
-% \input{evaluation_plan/evaluation_plan.tex}
-\input{design/design.tex}
-\input{implementation/implementation.tex}
-% \input{evaluation/evaluation.tex}
-% \input{conclusion/conclusion.tex}
-% \input{appendix/appendix.tex}
+\input{introduction/introduction}
+\input{investigation/investigation}
 
 \printbibliography
 
