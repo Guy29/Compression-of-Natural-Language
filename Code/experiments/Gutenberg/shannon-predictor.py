@@ -62,7 +62,7 @@ class ArithmeticCode:
     total = sum(probability_dict.values())
     intervals = [(frequency/total,symbol) for (symbol,frequency) in probability_dict.items()]
     intervals.sort(reverse=True)
-    steps = [(0.,None)]
+    steps = [(0., 256)]
     for probability, symbol in intervals:
       prev_probability, prev_symbol = steps[-1]
       steps.append((prev_probability + probability, symbol))
@@ -75,7 +75,7 @@ class ArithmeticCode:
     scale = 2**floor(-log(interval_size, 2))
     while ceil(interval_end*scale) - ceil(interval_start*scale) < 2:
       scale *= 2
-    return bitarray(bin(ceil(interval_start*scale))[2:])
+    return bitarray(bin(ceil(interval_start*scale + scale))[3:])
     
   def decode(self, bitarr, index):
     integer_representation = 0
@@ -86,24 +86,23 @@ class ArithmeticCode:
       integer_representation += bitarr[index]
       index += 1
       scale *= 2
-      interval_start = (integer_representation / scale, '')
-      interval_end   = ((integer_representation + 1) / scale, '')
+      interval_start = (integer_representation / scale, 1e400)
+      interval_end   = ((integer_representation + 1) / scale, -1e400)
       start_index = bisect_right(self.steps, interval_start)
       end_index   = bisect_left (self.steps, interval_end)
-    return self.steps[end_index][1]
+    if start_index != end_index: return (None, index)
+    return (self.steps[end_index][1], index)
 
-t = ArithmeticCode({'a': 0.25, 'b': 0.5, 'c': 0.25})
-print(t.steps)
-print(t.encode('c'))
-print(t.decode(t.encode('c'),0))
+
 
 #############################################################
 
 
 class Predictor:
   
-  def __init__(self, text, window=6):
+  def __init__(self, text, window = 6, Code = ArithmeticCode):
     self.window = window
+    self.Code = Code
     self.cached_huffman_codes = {}
     self.train(text)
   
@@ -125,13 +124,13 @@ class Predictor:
     self.byte_counts = Counter(text)
     self.byte_counts.update(bytes(range(256)))
     
-    self.default_huffman_code = HuffmanCode(self.byte_counts)
+    self.default_huffman_code = self.Code(self.byte_counts)
   
   def huffman_for_stub(self, stub):
     if stub in self.cached_huffman_codes:
       huffman_code = self.cached_huffman_codes[stub]
     elif stub in self.completions:
-      huffman_code = HuffmanCode(self.completions[stub])
+      huffman_code = self.Code(self.completions[stub])
       self.cached_huffman_codes[stub] = huffman_code
     else:
       huffman_code = self.default_huffman_code
