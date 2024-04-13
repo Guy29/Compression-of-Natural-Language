@@ -37,8 +37,15 @@ for fname in k:
   if '(' in fname: continue
   if not fname.endswith('.zip'): continue
   if fname in self_compression_stats: continue
+  if fname in ['3513.zip', '3514.zip']: continue
   
-  text = read_txt_from_zip('../../../Data/book_zips/'+fname)
+  try:
+    text = read_txt_from_zip('../../../Data/book_zips/'+fname)
+  except FileNotFoundError:
+    continue
+  book_name = text.split(b'\r')[0].split(b'eBook of ')[-1]
+  if b'Human Genome Project' in book_name: continue
+  
   compressed_size = len(lzma.compress(text))
   compressor = CoCompressor(text)
   cocompressed_size = len(compressor.compress(text))
@@ -49,7 +56,6 @@ for fname in k:
   if compression_ratio > best_compression_ratio:
     best_compression_fname = fname
     best_compression_ratio = compression_ratio
-    book_name = text.split(b'\r')[0].split(b'eBook of ')[-1].decode()
     print(best_compression_fname, best_compression_ratio, book_name)
   
   if len(self_compression_stats)%20==0:
