@@ -5,6 +5,8 @@ from bitarray      import bitarray, decodetree
 #from bitarray.util import huffman_code
 from time          import time
 from functools     import cache
+from math          import log, floor, ceil
+from bisect        import bisect_left, bisect_right
 
 
 #############################################################
@@ -52,9 +54,48 @@ class HuffmanCode:
     return (None if type(entry)==dict else entry), index
 
 
-t = HuffmanCode({'a': 0.25, 'b': 0.5, 'c': 0.25})
+#############################################################
 
+class ArithmeticCode:
+  
+  def __init__(self, probability_dict):
+    total = sum(probability_dict.values())
+    intervals = [(frequency/total,symbol) for (symbol,frequency) in probability_dict.items()]
+    intervals.sort(reverse=True)
+    steps = [(0.,None)]
+    for probability, symbol in intervals:
+      prev_probability, prev_symbol = steps[-1]
+      steps.append((prev_probability + probability, symbol))
+    self.steps = steps
+    self.intervals = {steps[i][1]: (steps[i-1][0],steps[i][0]) for i in range(1,len(steps))}
+    
+  def encode(self, symbol):
+    interval_start, interval_end = self.intervals[symbol]
+    interval_size = interval_end - interval_start
+    scale = 2**floor(-log(interval_size, 2))
+    while ceil(interval_end*scale) - ceil(interval_start*scale) < 2:
+      scale *= 2
+    return bitarray(bin(ceil(interval_start*scale))[2:])
+    
+  def decode(self, bitarr, index):
+    integer_representation = 0
+    scale = 1
+    start_index, end_index = 0, 1
+    while start_index != end_index and index < len(bitarr):
+      integer_representation *= 2
+      integer_representation += bitarr[index]
+      index += 1
+      scale *= 2
+      interval_start = (integer_representation / scale, '')
+      interval_end   = ((integer_representation + 1) / scale, '')
+      start_index = bisect_right(self.steps, interval_start)
+      end_index   = bisect_left (self.steps, interval_end)
+    return self.steps[end_index][1]
 
+t = ArithmeticCode({'a': 0.25, 'b': 0.5, 'c': 0.25})
+print(t.steps)
+print(t.encode('c'))
+print(t.decode(t.encode('c'),0))
 
 #############################################################
 
