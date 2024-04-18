@@ -79,8 +79,9 @@ better_performing = [filename for (filename,val) in items if val>1095.4]
 
 def get_title_from_filename(fname):
   return read_txt_from_zip('../../../Data/book_zips/'+fname).split(b'\r')[0].split(b'EBook of ')[-1]
-  
+
 better_performing = [get_title_from_filename(fname) for fname in better_performing]
+  
 
 print(f'These are: {better_performing}')
 
@@ -92,3 +93,10 @@ plt.xlim((0,1500))
 plt.xlabel('Self-compression score')
 plt.ylabel('Frequency (log scale)')
 plt.savefig('fig_self-compression_histogram.png', dpi=150, bbox_inches='tight', pad_inches=0)
+
+
+
+for fname in [filename for (filename,val) in items if val>1095.4]:
+  text = read_txt_from_zip('../../../Data/book_zips/'+fname)
+  with open('../../../Data/new_books/'+fname.split('.')[0]+'.txt','wb+') as f:
+    f.write(text)

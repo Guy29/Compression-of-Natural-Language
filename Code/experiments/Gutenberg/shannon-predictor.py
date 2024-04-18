@@ -179,7 +179,7 @@ print('\nThe predictor trained on War and Peace generates the ' +\
       'following example completions for the word "Nicholas":\n')
       
 for i in range(20):
-  print(war_and_peace_predictor.decode(randbytes(50)+b'\0', prefix=b'Nicholas'))
+  print(war_and_peace_predictor.decode(randbytes(50)+b'\0', prefix=b'Nicholas').decode('utf8'))
 
 
 #############################################################
