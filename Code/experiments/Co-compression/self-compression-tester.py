@@ -32,7 +32,7 @@ with open('stats.json') as f:
 best_compression_fname = max(self_compression_stats, key=lambda k: self_compression_stats[k])
 best_compression_ratio = self_compression_stats[best_compression_fname]
 
-for fname in k:
+for fname in k[:0]:
   
   if '(' in fname: continue
   if not fname.endswith('.zip'): continue
@@ -63,3 +63,32 @@ for fname in k:
     with open('stats.json','w+') as f:
       json.dump(stats, f, indent=2, ensure_ascii=False)
     print(f'{len(self_compression_stats)} entries saved.')
+
+
+
+with open('stats.json','r+') as f:
+  stats = json.load(f)
+
+items = stats['self_compression'].items()
+vals = stats['self_compression'].values()
+
+print(f'There are {len(vals)} texts considered in the dataset.')
+print(f'Of which {len([v for v in vals if v>1095.4])} have a better RCR than Middlemarch.')
+
+better_performing = [filename for (filename,val) in items if val>1095.4]
+
+def get_title_from_filename(fname):
+  return read_txt_from_zip('../../../Data/book_zips/'+fname).split(b'\r')[0].split(b'EBook of ')[-1]
+  
+better_performing = [get_title_from_filename(fname) for fname in better_performing]
+
+print(f'These are: {better_performing}')
+
+import matplotlib.pyplot as plt
+
+plt.hist(vals, bins=50, color='#49cd49', edgecolor='white', linewidth=1)
+plt.yscale('log')
+plt.xlim((0,1500))
+plt.xlabel('Self-compression score')
+plt.ylabel('Frequency (log scale)')
+plt.savefig('fig_self-compression_histogram.png', dpi=150, bbox_inches='tight', pad_inches=0)
