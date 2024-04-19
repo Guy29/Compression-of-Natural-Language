@@ -159,6 +159,23 @@ class Predictor:
       out.append(symbol)
       index = new_index
     return bytes(out)
+  
+  def encoding_probabilities_ranks(self, text):
+    symbols       = []
+    probabilities = []
+    ranks         = []
+    for i in range(len(text)):
+      stub   = text[i-self.window+1:i]
+      symbol = text[i]
+      symbol_expectations = self.completions[stub] if stub in self.completions else self.byte_counts
+      symbol_frequency   = symbol_expectations[symbol]
+      symbol_probability = symbol_expectations[symbol]/symbol_expectations.total()
+      symbol_rank = len([sym for sym,freq in symbol_expectations.items() if freq>symbol_frequency])+1
+      
+      symbols.append(symbol)
+      probabilities.append(symbol_probability)
+      ranks.append(symbol_rank)
+    return (symbols, probabilities, ranks)
 
 
 #############################################################
@@ -168,11 +185,17 @@ war_and_peace = open('../../../Data/books/pg2600.txt','rb+').read()
 
 war_and_peace_predictor = Predictor(war_and_peace, window=6)
 
-inigo_encoding = war_and_peace_predictor.encode(b'My name is Inigo Montoya')
+inigo_text     = b'My name is Inigo Montoya. You killed my father. Prepare to die.'
+inigo_encoding = war_and_peace_predictor.encode(inigo_text)
 inigo_decoding = war_and_peace_predictor.decode(inigo_encoding)
 
 print(inigo_encoding)
 print(inigo_decoding)
+
+print(war_and_peace_predictor.encoding_probabilities_ranks(inigo_text))
+
+
+#############################################################
 
 
 print('\nThe predictor trained on War and Peace generates the ' +\

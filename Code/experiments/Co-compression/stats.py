@@ -57,7 +57,7 @@ class Stats:
     for book_name in self.book_filenames:
       if book_name not in self.stats['book_titles']:
         with open(self.stats['books_location'] + book_name,'rb') as bk:
-          title = bk.read(200).split(b'\r')[0].split(b'eBook of ')[-1].decode()
+          title = bk.read(200).split(b'\r')[0].split(b'eBook of ')[-1].split(b'EBook of ')[-1].decode()
         self.stats['book_titles'][book_name] = title
 
   def update_single_compression_sizes(self):

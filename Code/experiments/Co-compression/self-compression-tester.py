@@ -96,7 +96,7 @@ plt.savefig('fig_self-compression_histogram.png', dpi=150, bbox_inches='tight', 
 
 
 
-for fname in [filename for (filename,val) in items if val>1095.4]:
-  text = read_txt_from_zip('../../../Data/book_zips/'+fname)
-  with open('../../../Data/new_books/'+fname.split('.')[0]+'.txt','wb+') as f:
-    f.write(text)
+#for fname in [filename for (filename,val) in items if val>800]:
+#  text = read_txt_from_zip('../../../Data/book_zips/'+fname)
+#  with open('../../../Data/new_books/'+fname.split('.')[0]+'.txt','wb+') as f:
+#    f.write(text)
