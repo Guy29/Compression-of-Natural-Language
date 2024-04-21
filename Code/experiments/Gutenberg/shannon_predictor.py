@@ -181,54 +181,53 @@ class Predictor:
 #############################################################
 
 
-war_and_peace = open('../../../Data/books/pg2600.txt','rb+').read()
+if __name__ == "__main__":
 
-war_and_peace_predictor = Predictor(war_and_peace, window=6)
+    war_and_peace = open('../../../Data/books/pg2600.txt','rb+').read()
 
-inigo_text     = b'My name is Inigo Montoya. You killed my father. Prepare to die.'
-inigo_encoding = war_and_peace_predictor.encode(inigo_text)
-inigo_decoding = war_and_peace_predictor.decode(inigo_encoding)
+    war_and_peace_predictor = Predictor(war_and_peace, window=6)
 
-print(inigo_encoding)
-print(inigo_decoding)
+    inigo_text     = b'Hello. My name is Inigo Montoya. You killed my father. Prepare to die.'
+    inigo_encoding = war_and_peace_predictor.encode(inigo_text)
+    inigo_decoding = war_and_peace_predictor.decode(inigo_encoding)
 
-print(war_and_peace_predictor.encoding_probabilities_ranks(inigo_text))
-
-
-#############################################################
+    print(len(inigo_encoding), inigo_encoding.hex())
+    print(len(inigo_decoding), inigo_decoding)
 
 
-print('\nThe predictor trained on War and Peace generates the ' +\
-      'following example completions for the word "Nicholas":\n')
-      
-for i in range(20):
-  print(war_and_peace_predictor.decode(randbytes(50)+b'\0', prefix=b'Nicholas').decode('utf8'))
+    #############################################################
 
 
-#############################################################
-
-# Use the predictor trained on War and Peace to compress
-#   The Count of Monte Cristo
-
-monte_cristo = open('../../../Data/books/pg1184.txt','rb+').read()
-
-t0 = time()
-compressed_monte_cristo = war_and_peace_predictor.encode(monte_cristo)
-
-print(f'\nText of The Count of Monte Cristo of length {len(monte_cristo)} bytes '+\
-      f'compressed to {len(compressed_monte_cristo)} bytes in {time()-t0} seconds.')
-
-# Text of The Count of Monte Cristo of length 2787236 bytes compressed to 962945 bytes in 80.86559343338013 seconds.
+    print('\nThe predictor trained on War and Peace generates the ' +\
+          'following example completion for the word "Nicholas":')
+          
+    print(war_and_peace_predictor.decode(randbytes(50)+b'\0', prefix=b'Nicholas').decode('utf8').__repr__())
 
 
-#############################################################
+    #############################################################
 
-# And use it again, this time on the text of War and Peace itself
+    # Use the predictor trained on War and Peace to compress
+    #   The Count of Monte Cristo
 
-t0 = time()
-compressed_war_peace = war_and_peace_predictor.encode(war_and_peace)
+    monte_cristo = open('../../../Data/books/pg1184.txt','rb+').read()
 
-print(f'\nText of War and Peace of length {len(war_and_peace)} bytes '+\
-      f'compressed to {len(compressed_war_peace)} bytes in {time()-t0} seconds.')
+    t0 = time()
+    compressed_monte_cristo = war_and_peace_predictor.encode(monte_cristo)
 
-# Text of The Count of Monte Cristo of length 3359632 bytes compressed to 788962 bytes in 139.9738645553589 seconds.
+    print(f'\nText of The Count of Monte Cristo of length {len(monte_cristo)} bytes '+\
+          f'compressed to {len(compressed_monte_cristo)} bytes in {time()-t0} seconds.')
+
+    # Text of The Count of Monte Cristo of length 2787236 bytes compressed to 962945 bytes in 80.86559343338013 seconds.
+
+
+    #############################################################
+
+    # And use it again, this time on the text of War and Peace itself
+
+    t0 = time()
+    compressed_war_peace = war_and_peace_predictor.encode(war_and_peace)
+
+    print(f'\nText of War and Peace of length {len(war_and_peace)} bytes '+\
+          f'compressed to {len(compressed_war_peace)} bytes in {time()-t0} seconds.')
+
+    # Text of The Count of Monte Cristo of length 3359632 bytes compressed to 788962 bytes in 139.9738645553589 seconds.
