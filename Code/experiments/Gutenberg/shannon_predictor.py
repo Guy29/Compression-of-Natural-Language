@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
     war_and_peace = open('../../../Data/books/pg2600.txt','rb+').read()
 
-    war_and_peace_predictor = Predictor(war_and_peace, window=6)
+    war_and_peace_predictor = Predictor(war_and_peace, window=6, Code=ArithmeticCode)
 
     inigo_text     = b'Hello. My name is Inigo Montoya. You killed my father. Prepare to die.'
     inigo_encoding = war_and_peace_predictor.encode(inigo_text)
@@ -207,27 +207,40 @@ if __name__ == "__main__":
     #############################################################
 
     # Use the predictor trained on War and Peace to compress
-    #   The Count of Monte Cristo
-
-    monte_cristo = open('../../../Data/books/pg1184.txt','rb+').read()
-
-    t0 = time()
-    compressed_monte_cristo = war_and_peace_predictor.encode(monte_cristo)
-
-    print(f'\nText of The Count of Monte Cristo of length {len(monte_cristo)} bytes '+\
-          f'compressed to {len(compressed_monte_cristo)} bytes in {time()-t0} seconds.')
-
-    # Text of The Count of Monte Cristo of length 2787236 bytes compressed to 962945 bytes in 80.86559343338013 seconds.
-
-
-    #############################################################
-
-    # And use it again, this time on the text of War and Peace itself
-
-    t0 = time()
-    compressed_war_peace = war_and_peace_predictor.encode(war_and_peace)
-
-    print(f'\nText of War and Peace of length {len(war_and_peace)} bytes '+\
-          f'compressed to {len(compressed_war_peace)} bytes in {time()-t0} seconds.')
-
-    # Text of The Count of Monte Cristo of length 3359632 bytes compressed to 788962 bytes in 139.9738645553589 seconds.
+    #   various texts
+    
+    chosen_books = {
+        "pg10.txt": "The King James Version of the Bible",
+        "pg100.txt": "The Complete Works of William Shakespeare",
+        "pg11.txt": "Alice's Adventures in Wonderland",
+        "pg1184.txt": "The Count of Monte Cristo",
+        "pg145.txt": "Middlemarch",
+        "pg996.txt": "Don Quixote",
+        "pg2554.txt": "Crime and Punishment",
+        "pg2600.txt": "War and Peace",
+    }
+    
+    text_fnames = list(chosen_books.keys())
+    book_titles = list(chosen_books.values())
+    compression_ratios = []
+    
+    huffman_predictor    = Predictor(war_and_peace, window=6, Code=HuffmanCode)
+    arithmetic_predictor = war_and_peace_predictor
+    
+    for text_fname in text_fnames:
+      current_text = open('../../../Data/books/'+text_fname,'rb+').read()
+      
+      huffman_compressed_text    = huffman_predictor.encode(current_text)
+      huffman_compression_ratio  = len(current_text) / len(huffman_compressed_text)
+      
+      arithmetic_compressed_text = arithmetic_predictor.encode(current_text)
+      arithmetic_compression_ratio  = len(current_text) / len(arithmetic_compressed_text)
+      
+      compression_ratios.append([huffman_compression_ratio, arithmetic_compression_ratio])
+      
+    import pandas as pd
+    
+    columns = ['Huffman compression size', 'Arithmetic compression size']
+    WP_performance = pd.DataFrame(columns = columns, index = book_titles, data = compression_ratios)
+    
+    print(WP_performance)
