@@ -3,14 +3,14 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.utils import to_categorical
-import pickle
+import json
 
 class LSTMPredictor:
     def __init__(self, basis_text, window):
         self.window = window
-        self.num_classes = 256  # Full byte range
+        self.num_classes = 256
         self.model = self._build_model()
-        self.train(basis_text)
+        if basis_text: self.train(basis_text)
 
     def _build_model(self):
         model = Sequential()
@@ -21,10 +21,6 @@ class LSTMPredictor:
         return model
 
     def train(self, data):
-        # Ensuring all byte values are represented
-        unique_bytes = set(data)
-        if len(unique_bytes) < self.num_classes:
-            print(f"Warning: Only {len(unique_bytes)} unique bytes found. Model expects {self.num_classes}.")
 
         seq_length = self.window
         dataX, dataY = [], []
@@ -45,15 +41,58 @@ class LSTMPredictor:
         prediction = self.model.predict(x, verbose=0).flatten()
         return {i: prob for i, prob in enumerate(prediction)}
 
-# Usage remains the same
+    def save(self, filename):
+        # Save the model weights and configuration
+        model_config = {
+            'model_json': self.model.to_json(),
+            'window': self.window
+        }
+        self.model.save_weights(f'{filename}.weights.h5')
+        with open(filename, 'w') as f:
+            json.dump(model_config, f)
+
+    def load(self, filename):
+        # Load model configuration and weights
+        with open(filename, 'r') as f:
+            model_config = json.load(f)
+        self.window = model_config['window']
+        model_json = model_config['model_json']
+        self.model = tf.keras.models.model_from_json(model_json)
+        self.model.load_weights(f'{filename}.weights.h5')
+        return self
 
 
-# Example basis text and usage
-basis_text = open('../../../Data/books/pg10.txt','rb').read()[:2000]
-predictor = LSTMPredictor(basis_text, window=5)
+
+training_books = {
+    "pg1400.txt": "Great Expectations",
+    "pg2554.txt": "Crime and Punishment",
+    "pg1661.txt": "Sherlock Holmes",
+    "pg1342.txt": "Pride and Prejudice",
+    "pg1399.txt": "Anna Karenina"
+    }
+
+
+#predictor = LSTMPredictor(None, window=40)
+#predictor.save('test-lstm')
+#predictor.load('test-lstm')
+
+while True:
+  #break
+  for fname, book_title in training_books.items():
+    print(f'Training on: {book_title}')
+  
+    text   = open('../../../Data/books/' + fname,'rb').read()
+    starts = list(range(0,len(text),100000))
+    
+    for start in starts:
+      part = text[start:start+100000]
+      predictor = LSTMPredictor(None, window=40)
+      predictor.load('test-lstm')
+      predictor.train(part)
+      predictor.save('test-lstm')
 
 # Predict using a sample byte sequence
-sample_bytes = b"Hello world! This is an example of text to byte prediction."
+sample_bytes = b"Sometimes I'll start a sentence, and I don't even know where it's"
 
 for _ in range(50):
   prediction = predictor.predict(sample_bytes)
