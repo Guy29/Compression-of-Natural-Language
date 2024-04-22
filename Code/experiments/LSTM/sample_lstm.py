@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.utils import to_categorical
-import json
+import json, random
 
 class LSTMPredictor:
     def __init__(self, basis_text, window):
@@ -62,13 +62,23 @@ class LSTMPredictor:
         return self
 
 
+def select(probability_dict):
+  probability_list = list(probability_dict.items())
+  probability_list.sort(key=lambda t: t[1], reverse=True)
+  k = random.random()
+  i = 0
+  while probability_list[i][1] < k:
+    k -= probability_list[i][1]
+    i += 1
+  return probability_list[i][0]
+
 
 training_books = {
-    "pg1661.txt": "Sherlock Holmes",
-    "pg1342.txt": "Pride and Prejudice",
     "pg1399.txt": "Anna Karenina",
     "pg1400.txt": "Great Expectations",
-    "pg2554.txt": "Crime and Punishment"
+    "pg2554.txt": "Crime and Punishment",
+    "pg1661.txt": "Sherlock Holmes",
+    "pg1342.txt": "Pride and Prejudice"
     }
 
 
@@ -94,10 +104,9 @@ while True:
 # Predict using a sample byte sequence
 sample_bytes = b"Sometimes I'll start a sentence, and I don't even know where it's"
 
-for _ in range(50):
+for _ in range(500):
   prediction = predictor.predict(sample_bytes)
-  _, most_likely = max((a,b) for (b,a) in prediction.items())
-  sample_bytes += most_likely.to_bytes()
+  sample_bytes += select(prediction).to_bytes()
 
 print(sample_bytes)
-print(sample_bytes.decode('utf8'))
+#print(sample_bytes.decode('utf8'))
