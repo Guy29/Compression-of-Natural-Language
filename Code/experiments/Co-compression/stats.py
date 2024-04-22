@@ -202,17 +202,20 @@ class Stats:
     df = pd.DataFrame(top + [('...',)*3] + bottom, columns=['Score', 'Book 1', 'Book 2'])
     print(df.to_string(index=False))
   
-  def draw_cocomp_performance(self, filename):
-  
+  def draw_cocomp_performance(self, filename, text_selection=None, ylim=(0.7,1.3)):
+    
+    if text_selection is None:
+      text_selection = self.book_filenames
+    
     performances = {}
-    for title in self.book_filenames:
-      ratios = [stats['ratio'] for text,stats in self.stats['cocompressor_performance'][title].items()]
-      performances[self.stats['abbreviated_book_titles'][title]] = sorted(ratios, reverse=True)
+    for fname in text_selection:
+      ratios = [stats['ratio'] for text,stats in self.stats['cocompressor_performance'][fname].items()]
+      performances[self.stats['abbreviated_book_titles'][fname]] = sorted(ratios, reverse=True)
     
     median_performance = sorted(performances, key=lambda title: median(performances[title]), reverse=True)
     extreme_median_performances = median_performance[:3]+median_performance[-3:]
     
-    all_titles = set(self.stats['abbreviated_book_titles'].values())
+    all_titles = set(performances)
 
     plt.figure(figsize=(10, 6))
     
@@ -225,7 +228,7 @@ class Stats:
     plt.grid(axis='y', linestyle='--')
 
     plt.xlim(2, 96)
-    plt.ylim(0.7, 1.3)
+    plt.ylim(*ylim)
 
     plt.legend()
     plt.xlabel('Texts sorted by ease of compression')
@@ -248,4 +251,8 @@ if __name__ == "__main__":
     #S.draw_cocomp_heatmap(sort_by='file size', filename='fig_cocomp_file_size.png')
     #S.draw_cocomp_heatmap(sort_by='median', filename='fig_cocomp_median.png')
     #S.print_most_least_similar()
-    S.draw_cocomp_performance(filename='fig_cocomp_performance.png')
+    S.draw_cocomp_performance(filename = 'fig_cocomp_performance.png',
+                              text_selection = [fname for fname in S.book_filenames if    (fname.startswith('pg'))])
+    S.draw_cocomp_performance(filename = 'fig_cocomp_performance_best.png',
+                              text_selection = [fname for fname in S.book_filenames if not(fname.startswith('pg')) or fname=='pg145.txt'],
+                              ylim = (1,1.3))
