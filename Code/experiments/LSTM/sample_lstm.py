@@ -64,17 +64,17 @@ class LSTMPredictor:
 
 
 training_books = {
-    "pg1400.txt": "Great Expectations",
-    "pg2554.txt": "Crime and Punishment",
     "pg1661.txt": "Sherlock Holmes",
     "pg1342.txt": "Pride and Prejudice",
-    "pg1399.txt": "Anna Karenina"
+    "pg1399.txt": "Anna Karenina",
+    "pg1400.txt": "Great Expectations",
+    "pg2554.txt": "Crime and Punishment"
     }
 
 
-#predictor = LSTMPredictor(None, window=40)
-#predictor.save('test-lstm')
-#predictor.load('test-lstm')
+#predictor = LSTMPredictor(None, window=10)
+#predictor.save('test-lstm-10')
+#predictor.load('test-lstm-10')
 
 while True:
   #break
@@ -87,9 +87,9 @@ while True:
     for start in starts:
       part = text[start:start+100000]
       predictor = LSTMPredictor(None, window=40)
-      predictor.load('test-lstm')
+      predictor.load('test-lstm-10')
       predictor.train(part)
-      predictor.save('test-lstm')
+      predictor.save('test-lstm-10')
 
 # Predict using a sample byte sequence
 sample_bytes = b"Sometimes I'll start a sentence, and I don't even know where it's"
