@@ -8,6 +8,7 @@ from itertools     import combinations_with_replacement, product
 from math          import log
 from statistics    import median, variance
 from co_compressor import CoCompressor
+from re            import fullmatch
 
 
 
@@ -252,7 +253,7 @@ if __name__ == "__main__":
     #S.draw_cocomp_heatmap(sort_by='median', filename='fig_cocomp_median.png')
     #S.print_most_least_similar()
     S.draw_cocomp_performance(filename = 'fig_cocomp_performance.png',
-                              text_selection = [fname for fname in S.book_filenames if    (fname.startswith('pg'))])
+                              text_selection = [fname for fname in S.book_filenames if fname.startswith('pg')])
     S.draw_cocomp_performance(filename = 'fig_cocomp_performance_best.png',
-                              text_selection = [fname for fname in S.book_filenames if not(fname.startswith('pg')) or fname=='pg145.txt'],
+                              text_selection = [fname for fname in S.book_filenames if fullmatch('\\d*(-\\d)?\\.txt',fname) or fname=='pg145.txt'],
                               ylim = (1,1.3))
