@@ -1,18 +1,18 @@
-import matplotlib.pyplot as plt
-import numpy as np
-from shannon_predictor import *
-from collections import Counter
-import pandas as pd
-
+import matplotlib.pyplot as     plt
+import numpy             as     np
+import pandas            as     pd
+from   codes             import Huffman, Arithmetic
+from   predictors        import Predictor, NGramPredictor, Compressor
+from   collections       import Counter
 
 
 war_and_peace = open('../../../Data/books/pg2600.txt','rb').read()
-war_and_peace_predictor = Predictor(war_and_peace, window=6)
+war_and_peace_predictor = NGramPredictor(war_and_peace, window=6)
 
 sherlock_text   = b'To Sherlock Holmes she is always the woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex. It was not that he felt any emotion akin to love for Irene Adler.'
 sherlock_string = sherlock_text.decode()
 
-symbols, probabilities, ranks = war_and_peace_predictor.encoding_probabilities_ranks(sherlock_text)
+symbols, probabilities, ranks = war_and_peace_predictor.surprisal(sherlock_text)
 
 cmap = plt.get_cmap("cividis")
 
@@ -60,7 +60,7 @@ plt.close()
 
 full_sherlock = open('../../../Data/books/pg1661.txt','rb').read()
 
-symbols, probabilities, ranks = war_and_peace_predictor.encoding_probabilities_ranks(full_sherlock)
+symbols, probabilities, ranks = war_and_peace_predictor.surprisal(full_sherlock)
 rank_frequencies   = Counter(ranks)
 rank_probabilities = Counter({r:rank_frequencies[r]/len(symbols) for r in rank_frequencies})
 
