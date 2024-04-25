@@ -33,7 +33,7 @@ class LSTMPredictor:
         X = np.reshape(dataX, (len(dataX), seq_length, 1)) / 255.0
         y = to_categorical(dataY, num_classes=self.num_classes)  # Ensure correct dimension
 
-        self.model.fit(X, y, epochs=1, batch_size=128)
+        self.model.fit(X, y, epochs=1, batch_size=2048)
 
     def predict(self, input_bytes):
         last_window_bytes = input_bytes[-self.window:]
@@ -74,11 +74,11 @@ def select(probability_dict):
 
 
 training_books = {
-    "pg1399.txt": "Anna Karenina",
-    "pg1400.txt": "Great Expectations",
-    "pg2554.txt": "Crime and Punishment",
-    "pg1661.txt": "Sherlock Holmes",
-    "pg1342.txt": "Pride and Prejudice"
+    #"pg1399.txt": "Anna Karenina",
+    #"pg1400.txt": "Great Expectations",
+    #"pg2554.txt": "Crime and Punishment",
+    #"pg1661.txt": "Sherlock Holmes",
+    "pg1342.txt": "Pride and Prejudice",
     }
 
 
@@ -102,7 +102,7 @@ while True:
       predictor.save('test-lstm-10')
 
 # Predict using a sample byte sequence
-sample_bytes = b"Sometimes I'll start a sentence, and I don't even know where it's"
+sample_bytes = b"Sometimes I'll start a sentence, and I don't even know where it's "
 
 for _ in range(500):
   prediction = predictor.predict(sample_bytes)
