@@ -1,13 +1,18 @@
-from collections   import Counter
-from bitarray      import bitarray
-from abc           import ABC, abstractmethod
-from codes         import Huffman, Arithmetic
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' 
+# Previous line is a patch to hide a warning about tensorflow not using AVX2 FMA instructions
+# Full solution is here: https://technofob.com/2019/06/14/how-to-compile-tensorflow-2-0-with-avx2-fma-instructions-on-mac/
 
-import numpy as np
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.utils import to_categorical
+from   collections   import Counter
+from   bitarray      import bitarray
+from   abc           import ABC, abstractmethod
+from   codes         import Huffman, Arithmetic
+import tensorflow    as tf
+import numpy         as np
+from   tensorflow.keras.models import Sequential
+from   tensorflow.keras.layers import LSTM, Input, Dense, Dropout
+from   tensorflow.keras.utils  import to_categorical
 import json, random
 
 
@@ -53,7 +58,7 @@ class NGramPredictor(Predictor):
     super().__init__(text)
   
   def context(self, text, index, previous_context=None):
-    return bytes(text[index-self.window+1:index])
+    return bytes(text[index-self.window+1:index]) if index-self.window+1>=0 else b''
   
   def train(self, text):
     
@@ -89,11 +94,12 @@ class LSTMPredictor(Predictor):
     self.completions = {}
   
   def context(self, text, index, previous_context=None):
-    return bytes(text[index-self.window:index])
+    return bytes(text[index-self.window:index]) if index-self.window>=0 else b''
 
   def _build_model(self):
     model = Sequential()
-    model.add(LSTM(256, input_shape=(self.window, 1)))
+    model.add(Input(shape=(self.window,1)))
+    model.add(LSTM(256))
     model.add(Dropout(0.2))
     model.add(Dense(256, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam')
@@ -121,8 +127,7 @@ class LSTMPredictor(Predictor):
       context = b'\n' * self.window
     x = np.reshape([b for b in context], (1, self.window, 1)) / 255.0
     prediction = self.model.predict(x, verbose=0).flatten()
-    frequencies = {i: prob+1e-5 for i, prob in enumerate(prediction)}
-    print({context: frequencies})
+    frequencies = {i: prob+1e-8 for i, prob in enumerate(prediction)}
     if memoize: self.completions[context] = frequencies
     return frequencies
 

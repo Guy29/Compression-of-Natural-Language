@@ -5,9 +5,7 @@ from   predictors  import Predictor, LSTMPredictor, Compressor
 
 #############################################################
 
-# Setting up a predictor trained on War and peace
-
-war_and_peace_predictor  = LSTMPredictor(None, window=6)
+war_and_peace_predictor  = LSTMPredictor(None, window=10)
 war_and_peace_predictor.load('test-lstm-10')
 war_and_peace_compressor = Compressor(predictor = war_and_peace_predictor, Code = Arithmetic)
 
