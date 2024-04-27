@@ -60,8 +60,8 @@ compression_methods[ 'bz2_lib'] = Codec( bz2.compress,  bz2.decompress)
 
 texts = []
 
-for book_filename in os.listdir('../../../Data/books'):
-  with open('../../../Data/books/'+book_filename,'rb+') as book:
+for book_filename in os.listdir('../../Data/books'):
+  with open('../../Data/books/'+book_filename,'rb+') as book:
     texts.append(book.read())
 
 text = b'---NEW BOOK---'.join(texts)
