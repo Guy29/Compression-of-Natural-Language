@@ -5,7 +5,6 @@ import pandas      as     pd
 from   random      import randbytes
 from   codes       import Huffman, Arithmetic
 from   predictors  import Predictor, NGramPredictor, Compressor
-import time
 
 #############################################################
 

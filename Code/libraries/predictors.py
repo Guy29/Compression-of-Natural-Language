@@ -9,12 +9,6 @@ from   random        import random
 from   bitarray      import bitarray
 from   abc           import ABC, abstractmethod
 from   codes         import Huffman, Arithmetic
-import tensorflow    as tf
-import numpy         as np
-from   tensorflow.keras.models import Sequential
-from   tensorflow.keras.layers import LSTM, Input, Dense, Dropout
-from   tensorflow.keras.utils  import to_categorical
-import json
 
 
 #############################################################
@@ -24,6 +18,9 @@ class Predictor(ABC):
   
   def __init__(self, data = None):
     if data is not None: self.train(data)
+  
+  @abstractmethod
+  def context(self, text, index, previous_context=None): pass
   
   @abstractmethod
   def train(self, text): pass
@@ -81,76 +78,6 @@ class NGramPredictor(Predictor):
   
   def frequencies_given_context(self, context, memoize=0):
     return self.completions[context] if context in self.completions else self.byte_counts
-
-
-#############################################################
-
-
-class LSTMPredictor(Predictor):
-  
-  def __init__(self, basis_text, window):
-    self.window = window
-    self.model = self._build_model()
-    if basis_text: self.train(basis_text)
-    self.completions = {}
-  
-  def context(self, text, index, previous_context=None):
-    return bytes(text[index-self.window:index]) if index-self.window>=0 else b''
-
-  def _build_model(self):
-    model = Sequential()
-    model.add(Input(shape=(self.window,1)))
-    model.add(LSTM(256))
-    model.add(Dropout(0.2))
-    model.add(Dense(256, activation='softmax'))
-    model.compile(loss='categorical_crossentropy', optimizer='adam')
-    return model
-
-  def train(self, data):
-
-    seq_length = self.window
-    dataX, dataY = [], []
-    for i in range(len(data) - seq_length):
-      seq_in = data[i:i + seq_length]
-      seq_out = data[i + seq_length]
-      dataX.append([byte for byte in seq_in])
-      dataY.append(seq_out)
-
-    X = np.reshape(dataX, (len(dataX), seq_length, 1)) / 255.0
-    y = to_categorical(dataY, num_classes=256)
-
-    self.model.fit(X, y, epochs=1, batch_size=2048)
-  
-  def frequencies_given_context(self, context, memoize=0):
-    if context in self.completions:
-      return self.completions[context]
-    if len(context)!=self.window:
-      context = b'\n' * self.window
-    x = np.reshape([b for b in context], (1, self.window, 1)) / 255.0
-    prediction = self.model.predict(x, verbose=0).flatten()
-    frequencies = {i: prob+1e-8 for i, prob in enumerate(prediction)}
-    if random() < memoize: self.completions[context] = frequencies
-    return frequencies
-
-  def save(self, filename):
-    # Save the model weights and configuration
-    model_config = {
-      'model_json': self.model.to_json(),
-      'window': self.window
-    }
-    self.model.save_weights(f'{filename}.weights.h5')
-    with open(filename, 'w') as f:
-      json.dump(model_config, f)
-
-  def load(self, filename):
-    # Load model configuration and weights
-    with open(filename, 'r') as f:
-      model_config = json.load(f)
-    self.window = model_config['window']
-    model_json = model_config['model_json']
-    self.model = tf.keras.models.model_from_json(model_json)
-    self.model.load_weights(f'{filename}.weights.h5')
-    return self
 
 
 #############################################################

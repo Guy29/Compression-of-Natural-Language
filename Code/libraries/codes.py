@@ -43,12 +43,13 @@ class Huffman(Code):
     self.symbol_encoding  = None
   
   def build_tree(self):
-    pairs = [(probability,random(),symbol) for (symbol,probability) in self.probability_dict.items()]
+    salt = 0
+    pairs = [(probability,(salt:=salt+1),symbol) for (symbol,probability) in self.probability_dict.items()]
     heapify(pairs)
     while len(pairs) > 1:
       probability1, _, symbol1 = heappop(pairs)
       probability2, _, symbol2 = heappop(pairs)
-      new_pair = (probability1 + probability2, random(), {0:symbol1, 1:symbol2})
+      new_pair = (probability1 + probability2, (salt:=salt+1), {0:symbol1, 1:symbol2})
       heappush(pairs, new_pair)
     self.tree = pairs[0][2]
   

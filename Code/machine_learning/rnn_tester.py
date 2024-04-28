@@ -13,12 +13,12 @@ import numpy      as np
 import tensorflow as tf
 from   random     import random
 from   tensorflow.keras.models import Sequential
-from   tensorflow.keras.layers import LSTM, Input, Dense, Dropout
+from   tensorflow.keras.layers import SimpleRNN, Input, Dense, Dropout
 from   tensorflow.keras.utils  import to_categorical
 
 
-class LSTMPredictor(Predictor):
-  
+class RNNPredictor(Predictor):
+
   def __init__(self, basis_text, window):
     self.window = window
     self.model = self._build_model()
@@ -28,7 +28,7 @@ class LSTMPredictor(Predictor):
   def _build_model(self):
     model = Sequential()
     model.add(Input(shape=(self.window,1)))
-    model.add(LSTM(256))
+    model.add(SimpleRNN(256))
     model.add(Dropout(0.2))
     model.add(Dense(256, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam')
@@ -47,9 +47,9 @@ class LSTMPredictor(Predictor):
 
     X = np.reshape(dataX, (len(dataX), self.window, 1)) / 255.0
     y = to_categorical(dataY, num_classes=256)
+    
+    self.model.fit(X, y, epochs=1, batch_size=128)
 
-    self.model.fit(X, y, epochs=1, batch_size=2048)
-  
   def frequencies_given_context(self, context, memoize=0):
     if context in self.completions:
       return self.completions[context]
@@ -84,17 +84,17 @@ class LSTMPredictor(Predictor):
 
 # Loading a pre-trained Predictor and creating the corresponding Compressor
 
-lstm_predictor  = LSTMPredictor(None, window=10)
-lstm_predictor.load('lstm-10')
-lstm_compressor = Compressor(predictor = lstm_predictor, Code = Arithmetic)
+rnn_predictor  = RNNPredictor(None, window=5)
+rnn_predictor.load('rnn-6')
+rnn_compressor = Compressor(predictor = rnn_predictor, Code = Arithmetic)
 
 #############################################################
 
 # Encoding-decoding test
 
 inigo_text     = b'Hello. My name is Inigo Montoya. You killed my father. Prepare to die.'
-inigo_encoding = lstm_compressor.encode(inigo_text)
-inigo_decoding = lstm_compressor.decode(inigo_encoding)
+inigo_encoding = rnn_compressor.encode(inigo_text)
+inigo_decoding = rnn_compressor.decode(inigo_encoding)
 
 print(f'Original text: {inigo_text}')
 print(f'Encoded text : {inigo_encoding.hex()}')
@@ -104,5 +104,5 @@ print(f'Decoded text : {inigo_decoding}')
 
 # Decoding noise to generate completions
 
-print('\nThe pre-trained LSTM predictor generates the following example completion for the word "Elizabeth":')
-print(lstm_compressor.decode(randbytes(50)+b'\0', context=b'Elizabeth ').decode('utf8').__repr__())
+print('\nThe pre-trained RNN predictor generates the following example completion for the word "Elizabeth":')
+print(rnn_compressor.decode(randbytes(50)+b'\0', context=b'Elizabeth ').decode('utf8').__repr__())
