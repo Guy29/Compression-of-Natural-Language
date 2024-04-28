@@ -1,13 +1,17 @@
+import sys
+sys.path.insert(0, '../libraries')
+
 import pandas      as     pd
 from   random      import randbytes
 from   codes       import Huffman, Arithmetic
 from   predictors  import Predictor, NGramPredictor, Compressor
+import time
 
 #############################################################
 
-# Setting up a predictor trained on War and peace
+# Setting up a Predictor trained on War and Peace and the corresponding Compressor
 
-war_and_peace_text       = open('../../../Data/books/pg2600.txt','rb+').read()
+war_and_peace_text       = open('../../Data/books/pg2600.txt','rb+').read()
 war_and_peace_predictor  = NGramPredictor(war_and_peace_text, window=6)
 war_and_peace_compressor = Compressor(predictor = war_and_peace_predictor, Code = Arithmetic)
 
@@ -45,25 +49,24 @@ chosen_books = {
     "pg2600.txt": "War and Peace",
 }
 
-text_fnames        = list(chosen_books.keys())
-book_titles        = list(chosen_books.values())
-compression_ratios = []
+WP_performance  = pd.DataFrame()
 
-huffman_compressor    = Compressor(predictor = war_and_peace_predictor, Code = Huffman)
-arithmetic_compressor = war_and_peace_compressor
+compressors = [Compressor(predictor = war_and_peace_predictor, Code = Arithmetic),
+               Compressor(predictor = war_and_peace_predictor, Code = Huffman)]
 
-for text_fname in text_fnames:
-  current_text                 = open('../../../Data/books/'+text_fname,'rb+').read()
+while compressors:
+
+  compressor = compressors.pop()
+
+  for text_fname, text_title in chosen_books.items():
   
-  huffman_compressed_text      = huffman_compressor.encode(current_text)
-  huffman_compression_ratio    = len(current_text) / len(huffman_compressed_text)
-  
-  arithmetic_compressed_text   = arithmetic_compressor.encode(current_text)
-  arithmetic_compression_ratio = len(current_text) / len(arithmetic_compressed_text)
-  
-  compression_ratios.append([huffman_compression_ratio, arithmetic_compression_ratio])
+    current_text         = open('../../Data/books/'+text_fname,'rb+').read()
+    compressed_text      = compressor.encode(current_text, memoize=0.5)
+    compression_ratio    = len(current_text) / len(compressed_text)
+      
+    WP_performance.at[text_title, f'{compressor.Code.name} compression size'] = compression_ratio
+    
+  del compressor
 
-columns        = ['Huffman compression size', 'Arithmetic compression size']
-WP_performance = pd.DataFrame(columns = columns, index = book_titles, data = compression_ratios)
-
+print()
 print(WP_performance)

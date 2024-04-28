@@ -34,9 +34,16 @@ class Code(ABC):
 # function as this implementation runs faster
 
 class Huffman(Code):
+
+  name = 'Huffman'
   
   def __init__(self, probability_dict):
-    pairs = [(probability,random(),symbol) for (symbol,probability) in probability_dict.items()]
+    self.probability_dict = probability_dict
+    self.tree             = None
+    self.symbol_encoding  = None
+  
+  def build_tree(self):
+    pairs = [(probability,random(),symbol) for (symbol,probability) in self.probability_dict.items()]
     heapify(pairs)
     while len(pairs) > 1:
       probability1, _, symbol1 = heappop(pairs)
@@ -44,7 +51,12 @@ class Huffman(Code):
       new_pair = (probability1 + probability2, random(), {0:symbol1, 1:symbol2})
       heappush(pairs, new_pair)
     self.tree = pairs[0][2]
+  
+  def build_symbol_encoding(self):
+    tree_exists = self.tree
+    if not tree_exists: self.build_tree()
     self.symbol_encoding = Huffman._reverse_lookup(self.tree)
+    if not tree_exists: self.tree = None
    
   @staticmethod
   def _reverse_lookup(tree, prefix=None):
@@ -59,9 +71,11 @@ class Huffman(Code):
     return reverse_lookup_table
   
   def encode(self, symbol):
+    if not self.symbol_encoding: self.build_symbol_encoding()
     return self.symbol_encoding[symbol]
   
   def decode(self, bitarr, index):
+    if not self.tree: self.build_tree()
     entry = self.tree
     while type(entry) == dict and index<len(bitarr):
       entry = entry[bitarr[index]]
@@ -74,6 +88,8 @@ class Huffman(Code):
 #############################################################
 
 class Arithmetic(Code):
+  
+  name = 'Arithmetic'
   
   def __init__(self, probability_dict):
     total = sum(probability_dict.values())

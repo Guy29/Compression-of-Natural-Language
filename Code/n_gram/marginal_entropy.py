@@ -7,7 +7,7 @@ from   statistics  import median
 
 
 def entropy(symbol_frequencies):
-  return sum(freq*log(freq,2) for freq in symbol_frequencies.values())
+  return -sum(freq*log(freq,2) for freq in symbol_frequencies.values())
 
 
 @cache
@@ -15,7 +15,7 @@ def n_gram_entropy(text, n):
   symbol_counts = Counter(text[i:i+n] for i in range(len(text)-n+1))
   total_count = symbol_counts.total()
   symbol_frequencies = {symbol: count/total_count for symbol,count in symbol_counts.items()}
-  return -entropy(symbol_frequencies)
+  return entropy(symbol_frequencies)
 
 
 @cache

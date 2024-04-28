@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, '../libraries')
+
 import matplotlib.pyplot as     plt
 import numpy             as     np
 import pandas            as     pd
@@ -6,7 +9,7 @@ from   predictors        import Predictor, NGramPredictor, Compressor
 from   collections       import Counter
 
 
-war_and_peace = open('../../../Data/books/pg2600.txt','rb').read()
+war_and_peace = open('../../Data/books/pg2600.txt','rb').read()
 war_and_peace_predictor = NGramPredictor(war_and_peace, window=6)
 
 sherlock_text   = b'To Sherlock Holmes she is always the woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex. It was not that he felt any emotion akin to love for Irene Adler.'
@@ -58,7 +61,7 @@ plt.close()
 #############################################################
 
 
-full_sherlock = open('../../../Data/books/pg1661.txt','rb').read()
+full_sherlock = open('../../Data/books/pg1661.txt','rb').read()
 
 symbols, probabilities, ranks = war_and_peace_predictor.surprisal(full_sherlock)
 rank_frequencies   = Counter(ranks)
@@ -82,4 +85,6 @@ plt.xlim((0.5,highest_shown_rank+0.5))
 plt.xticks([1,5,10,15,20,25,30])
 plt.ylim((0.0001,1))
 plt.yscale('log')
+plt.xlabel('Rank')
+plt.ylabel('Probability')
 plt.savefig('predictor_surprisal_histogram.png', dpi=300, bbox_inches='tight', pad_inches=0)
