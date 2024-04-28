@@ -1,8 +1,9 @@
-import pandas as pd
-from math        import log
-from functools   import cache
-from collections import Counter
-from statistics  import median
+import os
+import pandas      as pd
+from   math        import log
+from   functools   import cache
+from   collections import Counter
+from   statistics  import median
 
 
 def entropy(symbol_frequencies):
@@ -25,8 +26,16 @@ def marginal_entropy(text, n):
 
 #############################################################
 
+texts = []
 
-text = open('arthur-conan-doyle_the-adventures-of-sherlock-holmes.txt','rb+').read()
+for book_filename in os.listdir('../../Data/books'):
+  if not book_filename.startswith('pg'): continue
+  with open('../../Data/books/'+book_filename,'rb+') as book:
+    text = book.read()
+    if not b'Language: English' in text: continue
+    texts.append(text)
+
+text = b' '.join(texts)
 
 
 table = [(n, n_gram_entropy(text,n), marginal_entropy(text,n)) for n in range(1,11)]
@@ -59,11 +68,11 @@ c           = median(c_estimates)
 
 print(f"\nEstimate for constant in Zipf's law: {c}")
 
-# C is **very** close to exactly 0.1 . Why??
-
 pylab.plot(range(1,len(word_frequencies)+1), word_frequencies)
 pylab.plot(range(1,len(word_frequencies)+1), [c/i for i in range(1,len(word_frequencies)+1)])
 pylab.grid(True)
 pylab.xscale('log')
 pylab.yscale('log')
-pylab.show()
+pylab.xlabel('Word rank')
+pylab.ylabel('Word probability')
+pylab.savefig('zipf.png', dpi=150, bbox_inches='tight', pad_inches=0)
