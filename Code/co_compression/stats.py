@@ -1,14 +1,17 @@
+import sys
+sys.path.insert(0, '../libraries')
+
 import os, json, collections
 import zlib, lzma, gzip, bz2
 import pandas            as pd
 import seaborn           as sns
 import matplotlib.pyplot as plt
-from collections   import defaultdict
-from itertools     import combinations_with_replacement, product
-from math          import log
-from statistics    import median, variance
-from co_compressor import CoCompressor
-from re            import fullmatch
+from   collections       import defaultdict
+from   itertools         import combinations_with_replacement, product
+from   math              import log
+from   statistics        import median, variance
+from   co_compressor     import CoCompressor
+from   re                import fullmatch
 
 
 
@@ -188,15 +191,15 @@ class Stats:
     similarity_dict = self.similarity_matrix.to_dict()
       
     all_scores = [(value, bk1, bk2) for (bk1,bk2), value in self.similarity_matrix.stack().items() if bk1!=bk2]
-    all_scores.sort()
+    all_scores.sort(reverse = True)
 
     # Function to print human-friendly book names instead of Gutenberg filenames
     def title(book_filename):
-      return f"{self.stats['book_titles'][book_filename]} ({book_filename})"
+      return f"{self.stats['abbreviated_book_titles'][book_filename]} ({book_filename})"
 
     # Get the top and bottom pairs of books and replace book file names with book titles
-    top    = [(score,title(bk1),title(bk2)) for (score,bk1,bk2) in all_scores[:10]]
-    bottom = [(score,title(bk1),title(bk2)) for (score,bk1,bk2) in all_scores[-10:]]
+    top    = [(score,title(bk1),title(bk2)) for (score,bk1,bk2) in all_scores[:5]]
+    bottom = [(score,title(bk1),title(bk2)) for (score,bk1,bk2) in all_scores[-5:]]
 
 
     # Display them
@@ -245,15 +248,15 @@ class Stats:
 if __name__ == "__main__":
     S = Stats('stats.json')
     S.update_all_and_save()
-    #S.compute_similarity_matrix()
+    S.compute_similarity_matrix()
     #S.draw_similarity_heatmap(sort_by='file size', filename='fig_co-compression_file_size.png')
     #S.draw_similarity_heatmap(sort_by='median', filename='fig_co-compression_median.png')
     #S.compute_cocomp_matrix()
     #S.draw_cocomp_heatmap(sort_by='file size', filename='fig_cocomp_file_size.png')
     #S.draw_cocomp_heatmap(sort_by='median', filename='fig_cocomp_median.png')
-    #S.print_most_least_similar()
-    S.draw_cocomp_performance(filename = 'fig_cocomp_performance.png',
-                              text_selection = [fname for fname in S.book_filenames if fname.startswith('pg')])
-    S.draw_cocomp_performance(filename = 'fig_cocomp_performance_best.png',
-                              text_selection = [fname for fname in S.book_filenames if fullmatch('\\d*(-\\d)?\\.txt',fname) or fname=='pg145.txt'],
-                              ylim = (1,1.3))
+    S.print_most_least_similar()
+    #S.draw_cocomp_performance(filename = 'fig_cocomp_performance.png',
+    #                          text_selection = [fname for fname in S.book_filenames if fname.startswith('pg')])
+    #S.draw_cocomp_performance(filename = 'fig_cocomp_performance_best.png',
+    #                          text_selection = [fname for fname in S.book_filenames if fullmatch('\\d*(-\\d)?\\.txt',fname) or fname=='pg145.txt'],
+    #                          ylim = (1,1.3))
