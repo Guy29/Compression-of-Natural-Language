@@ -1,0 +1,9 @@
+\section{Dataset}
+
+Since this project examines the compression of natural language, it requires some raw material to work with. For this purpose, I use a collection of texts downloaded from \href{https://gutenberg.org/browse/scores/top}{Project Gutenberg}, as they're easy to download and all in the public domain.
+
+I initially manually download 97 of the top 100 texts (3 of them not being available as txt files), but as I needed a larger dataset for section \ref{subsec:co_comp_practical}, I automated this process and downloaded all ~96200 texts available on the website. The set of 97 texts was assumed to contain only English texts, but luckily this was not the case, as will be explored in section \ref{sec:co_comp}.
+
+Although python libraries such as \texttt{nltk} provide corpora for natural language processing, they are usually much smaller (only 18 texts in \texttt{nltk}'s case) and I opted for directly using Project Gutenberg for more control.
+
+The downloaded dataset is viewable at \texttt{\href{https://github.com/Guy29/FYP/blob/main/Data}{FYP/Data}} in the project repository and the scripts used to obtain it are in \texttt{\href{https://github.com/Guy29/FYP/blob/main/Code/dataset/}{Code/dataset}}.

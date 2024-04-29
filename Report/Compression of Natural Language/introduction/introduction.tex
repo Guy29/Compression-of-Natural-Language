@@ -13,13 +13,15 @@ To view the code used in this project, visit \url{https://github.com/Guy29/FYP}.
 \section{Motivation}
 \label{subsec:motivation}
 
-Occam’s razor is a general principle in science and rationality commonly attributed to William of Ockham (1290?-1349?) which states “entities should not be multiplied beyond necessity”, usually interpreted to mean “the simplest theory is usually the correct one.”
+Occam’s razor is a general principle in science and rationality commonly attributed to William of Ockham (1290-1349) which states “entities should not be multiplied beyond necessity”, usually interpreted to mean “the simplest theory is usually the correct one.”
 
 It is easy to take this principle for granted, as it seems to work in both science and in our daily experience. But why this should be the case, i.e. why we live in a regular enough world that simpler models of it tend to be more correct than more complex ones, is not obvious, and it has been historically pointed out by many philosophers (most famously David Hume) that knowledge gained in this way stands on shaky foundations. \autocite{Henderson2018}
 
 Solomonff’s theory of inductive inference provides a formalism for Occam’s razor. It posits an agent making observations in a world that operates by an unknown algorithm, and based on that premise shows that the agent would do well to assume that the length of the algorithm by which its world runs in effect follows a probability distribution that assigns shorter (and therefore simpler) algorithms more probability. This probability distribution is known as the universal prior.
 
 The argument Solomonoff uses can be understood as follows: if the agent considers all algorithms of the same complexity as equally likely, then the algorithms can be divided into subsets where each subset is functionally equivalent. Because there are more ways to implement simpler algorithms than more complex ones, they accrue more probability mass. For example, a crime investigator who knows that Alice likes apple pie and Bob doesn’t may consider the following hypotheses (of equal complexity) for the disappearance of an apple pie:
+
+\todo[color=yellow]{Need a better example here}
 
 \begin{enumerate}
     \item Alice stole it, wearing a red shirt.
@@ -29,26 +31,28 @@ The argument Solomonoff uses can be understood as follows: if the agent consider
 
 If each of these hypotheses is given the same probability initially, based on being of equal complexity, then a grouping of the first two as functionally equivalent (the colour of the shirt being irrelevant) makes it twice as likely that Alice is the culprit.
 
-Solomonoff’s theory of inductive inference uses the concept of Kolomogorov complexity, which refers to the length of the shortest program that would produce a specific output. For example, the Kolomogorov complexity of the string “1111 … 11111” is lower than that of “wp9j8 … fd27c”, as the first is more regular.
+Solomonoff’s theory of inductive inference uses the concept of Kolomogorov complexity, which refers to the length of the shortest program that would produce a specific output. For example, the Kolomogorov complexity of the string “1111 … 11111” is lower than that of “wp9j8 … fd27c”, as the first is more regular. The actual design of compression algorithms can be thought of as a way of empirically determining the Kolomogrov complexity of data by finding an algorithm that produces it which is shorter than the data itself.
 
 In the same way that Occam’s razor lacked formalism and proof until Solomonoff, the concept of intelligence similarly lacks formalism in modern computer science, and psychologist R. J. Sternberg remarks “there seem to be almost as many definitions of intelligence as there were experts asked to define it.” \autocite{Legg2007}
 
-Marcus Hutter \autocite{Hutter2000} proposes a formalism of an intelligent agent which he terms AIXI that combines the above ideas as well as ideas from reinforcement learning. AIXI is a theoretical agent which, in each time step,
+\textcite{Hutter2000} proposes a formalism of an intelligent agent which he terms AIXI that combines the above ideas as well as ideas from reinforcement learning. AIXI is a theoretical agent which, in each time step,
 
 \begin{enumerate}
     \item Makes an action $a_i$.
     \item Receives an observation $o_i$ and a reward (positive or negative) $r_i$.
     \item Generates all possible algorithms by which its world can run which would have predicted all of its observations and rewards so far, and weighs the probabilities of those algorithms inversely to their length (i.e. it applies the universal prior).
-    \item Uses the most likely algorithms (or models of its world) to simulate the world, and thereby decide on its following actions to maximize its reward.
+    \item Uses the most likely algorithms (or models of its world) to simulate the world, predict potential observations and rewards for potential future actions, and thereby decide on its following actions to maximize its reward.
 \end{enumerate}
 
-It can be seen that the above description of AIXI requires an agent that can effectively create a concise, compressed model of the observations it has made of its world so far, and that having such a model is most predictive of its success. For this reason, Hutter believes that intelligence, adaptability, and data compression are tightly bound.
+It can be seen that the above description of AIXI requires an agent that can effectively create a concise, compressed world-model that generates the observations it has made of its world so far (i.e. arriving at the simplest explanation for the underlying mechanisms of the world it inhabits, where simplicity indicates low Kolmogorov complexity), and that having such a model is most predictive of its success. It is for this reason that Hutter believes that intelligence can be defined in terms of data compression.
+
+Based on this hypothesis, \textcite{Hutter2006} created the Hutter Prize, intended to “encourage development of intelligent compressors/programs as a path to AGI”. The prize rewards improvements in data compression on a specific 1 GB text file, titled \texttt{enwik9}, which is extracted from the English Wikipedia, chosen on the reasoning that “Wikipedia is an extensive snapshot of human knowledge. If you can compress the first 1GB of Wikipedia better than your predecessors, your (de)compressor likely has to be smart(er) [...] while intelligence is a slippery concept, file sizes are hard numbers.”
+
+This project examines some of the intuitions that relate compression and comprehension of natural language, and provides an overview of some of the existing theory and of its practical applications.
 
 \section{Professional and Ethical Considerations}
 \label{subsec:bcs}
 To the best of my knowledge, there are no professional or ethical considerations, as given by the BCS code of conduct (\url{https://www.bcs.org/membership/become-a-member/bcs-code-of-conduct/}) that would constrain any part of this project. The core of the project is a review and discussion of existing techniques, and practical applications will likely be limited to improvements on compression algorithms. All data used in this project is in the public domain.
 
-
-
-\input{introduction/theory}
-\input{introduction/practice}
+\section{Structure of this report}
+This report approaches compression of natural language from a few different angles. These approaches share some essential concepts, but each also requires its own bit of background. For readability, I've opted to structure the report in a similar way, giving a high-level overview of essential abstract concepts in the \hyperref[chap:overview]{Overview} chapter but also beginning each section of the \hyperref[chap:investigation]{Investigation} chapter with its own specialized background.

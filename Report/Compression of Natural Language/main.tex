@@ -21,11 +21,17 @@
 
 \usepackage{titlesec}
 
-\usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{multirow}
 
 \usepackage{subcaption}
+\usepackage{blindtext}
+\usepackage{quotchap}
+\usepackage{makecell}
+
+\usepackage{wrapfig}
+\usepackage{float}
+
 
 % Listings (for displaying code):
 \usepackage{listings}
@@ -122,6 +128,7 @@ linecolor=gray!40,
 \renewcommand*{\rmdefault}{bch}
 \renewcommand*{\ttdefault}{lmtt}
 \newcommand{\citationneeded}{\textcolor{red}{[citation-needed]}}
+\newcommand{\hexbox}[1]{\fbox{\texttt{#1}}}
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\argmax}{\arg\!\max}
@@ -175,7 +182,9 @@ linecolor=gray!40,
 % Uncomment or add folders to add your own chapters and input files.
 
 \input{introduction/introduction}
+\input{overview/overview}
 \input{investigation/investigation}
+\input{discussion/discussion}
 
 \printbibliography
 
