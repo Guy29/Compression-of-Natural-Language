@@ -10,6 +10,11 @@ from   bitarray      import bitarray
 from   abc           import ABC, abstractmethod
 from   codes         import Huffman, Arithmetic
 
+import json
+import numpy      as np
+import tensorflow as tf
+from   tensorflow.keras.utils  import to_categorical
+
 
 #############################################################
 
@@ -44,6 +49,66 @@ class Predictor(ABC):
       ranks.append(symbol_rank)
     return (symbols, probabilities, ranks)
 
+
+
+#############################################################
+
+
+class NNPredictor(Predictor):
+  
+  def __init__(self, basis_text, window):
+    self.window = window
+    self.model = self._build_model()
+    if basis_text: self.train(basis_text)
+    self.completions = {}
+
+  @abstractmethod
+  def _build_model(self): pass
+  
+  def context(self, text, index, previous_context=None):
+    return bytes(text[index-self.window:index]) if index-self.window>=0 else b'\n'*self.window
+
+  def train(self, data):
+    dataX, dataY = [], []
+    for i in range(len(data) - self.window):
+      seq_in = data[i:i + self.window]
+      seq_out = data[i + self.window]
+      dataX.append([byte for byte in seq_in])
+      dataY.append(seq_out)
+
+    X = np.reshape(dataX, (len(dataX), self.window, 1)) / 255.0
+    y = to_categorical(dataY, num_classes=256)
+
+    self.model.fit(X, y, epochs=1, batch_size=2048)
+  
+  def frequencies_given_context(self, context, memoize=0):
+    if context in self.completions:
+      return self.completions[context]
+    x = np.reshape([b for b in context], (1, self.window, 1)) / 255.0
+    prediction = self.model.predict(x, verbose=0).flatten()
+    frequencies = {i: prob+1e-8 for i, prob in enumerate(prediction)}
+    if random() < memoize: self.completions[context] = frequencies
+    return frequencies
+
+  def save(self, filename):
+    # Save the model weights and configuration
+    model_config = {
+      'model_json': self.model.to_json(),
+      'window': self.window
+    }
+    self.model.save_weights(f'{filename}.weights.h5')
+    with open(filename, 'w') as f:
+      json.dump(model_config, f)
+
+  def load(self, filename):
+    # Load model configuration and weights
+    with open(filename, 'r') as f:
+      model_config = json.load(f)
+    self.window = model_config['window']
+    model_json = model_config['model_json']
+    self.model = tf.keras.models.model_from_json(model_json)
+    self.model.load_weights(f'{filename}.weights.h5')
+    return self
 
 
 #############################################################
