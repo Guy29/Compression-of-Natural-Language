@@ -1,0 +1,44 @@
+\chapter{Discussion and future work}
+\label{chap:discussion}
+
+As each of sections \ref{sec:n_gram}, \ref{sec:machine_learning}, and \ref{sec:co_comp} includes its own specialized discussion, this chapter addresses only the approaches not explored before, as well as the bigger picture.
+
+\section{Other avenues of investigation}
+
+Firstly, one approach was considered for this report but was not implemented, and I would like to do a brief discussion of it here. That is, the potential use of programming language compilation techniques for compression.
+
+In 1970, logician Richard Montague posited that there is “no important theoretical difference between natural languages and the artificial languages of logicians” and that it is “possible to comprehend the syntax and semantics of both kinds of language within a single natural and mathematically precise theory.” \autocite{Montague1970_universal_grammar} and \autocite{Montague1970_english_formal}
+
+Montague gives a grammar which can be used to parse English, and a specification for a parser based on this grammar is given by Friedman \& Warren \autocite{Friedman1978}.
+
+Intuitively, a grammar for natural language may include parts of speech as nonterminals, such as (noun), (verb), etc. and only actual words as terminals, and may even include intermediary nonterminals such as (item-of-furniture). Once such a grammar exists, it becomes possible to parse a sentence in English and do operations such as type checking, which should for example signal that the sentence "Tomorrow I ate a sandwich" is inconsistent.
+
+The utility of such a compilation for compression would arise from the reasoning given at the end of section \ref{sec:regularity_and_context}, namely the principle of making illegal states unrepresentable. In practice, this would mean that the nonterminal (item-of-furniture) may only be replaced with a limited set of words such as "chair", "desk", etc., and therefore only representations for these are required, meaning shorter codes. In effect, such an approach, if workable, would be equivalent to compiling natural language into bytecode.
+
+Existing techniques of grammar-based codes, grammar induction, part-of-speech tagging, and ideas from probabilistic context-free grammars and the categorical grammar may be used in this context.
+
+
+\section{Potential applications}
+
+Applications for good algorithms for compressing natural language tie in with the premise of this paper, namely that compression and comprehension are equivalent problems. For example, better pre-processing of text for training a language model could facilitate training, as the model would not have to learn regularities in the text which have been abstracted out, and modern LLMs do in fact use pre-processed versions of the text they are fed, as they process embeddings of their tokens (representations of the semantic content of those tokens) rather than directly consume the tokens.
+
+Another potential application is in the field of cryptography, where regularities in plaintexts are the source of many vulnerabilities. Because of this, the more complete a compression of data is performed and therefore the less regularity is left, the more secure we can expect encryption to be.
+
+Lastly, if the equivalence of compression and understanding holds - as this report and the section on \hyperref[sec:machine_learning]{machine learning} in particular has tried to show - it may be possible to use better compression methods to generate coherent completions for text, something which the last few years and the rise of GPT has shown the utility of.
+
+\section{Bigger picture}
+
+The modern use of large language models means that what this report tries to illustrate (namely the role of compression in learning) happens implicitly and with human agency largely restricted to the choice of neural network architecture.
+
+For practical applications, that approach has shown its power and this report does not aim to diminish its utility. But for a robust theoretical understanding of intelligence and cognitition on a mathematical level, especially one that can inform both the creation of learning agents and interpreting existing ones including humans, it is useful to clearly define and understand the relationships between concepts such as prediction, observation, information, surprise, regularity, the role of context, abstraction, coding, compression, and finally understanding, which I have aimed to do in this report.
+
+\section{Acknowledgements}
+My thanks to Prof. Ian Mackie for his guidance as my supervisor in the creation of project and report, and for his support in various endeavors during my studies at Sussex.
+
+\todo[inline, color=yellow]{Tie it all up}
+
+\todo[inline, color=yellow]{Find some proxy indicator of entropy in a file and do various trials on methods of compression and report on how much it cuts. For example: if the text uses the words "Sherlock Holmes" a lot, and you abbreviate it to "SH" and compress the text, does it compress worse as one would expect?}
+
+\todo[inline, color=yellow]{Mention the use of compression algorithms as black boxes to estimate the amount of information present in data, for example use of compression to correctly focus a microscope}
+
+\todo[inline, color=yellow]{Conclusion — this should include an assessment of the success of the finished product. Have you achieved your objectives? If not, why not? It should also contain suggestions for future extensions, or alternative methodologies that, with hindsight, might have led to a better system.}

@@ -49,15 +49,15 @@ This score giving a measure of the similarity of \(y\) to \(x\). In this case, $
 \label{fig:heatmap_fsort}
 \end{figure}
 
-This similarity score is plotted for pairs of texts in figures \ref{fig:heatmap_ppsort} and \ref{fig:heatmap_fsort}, each plot giving \(x\) on the horizontal axis and \(y\) on the vertical axis, the color of the cell representing \(similarity(x|y)\). In figure \ref{fig:heatmap_ppsort}, the texts on the vertical axis are sorted by how predictive they are on average, and the texts on the horizontal axis are sorted by how predictable they are. In figure \ref{fig:heatmap_fsort}, the same texts are instead sorted by file size on both axes.
+This similarity score is plotted for pairs of texts in Figures \ref{fig:heatmap_ppsort} and \ref{fig:heatmap_fsort}, each plot giving \(x\) on the horizontal axis and \(y\) on the vertical axis, the color of the cell representing \(similarity(x|y)\). In Figure \ref{fig:heatmap_ppsort}, the texts on the vertical axis are sorted by how predictive they are on average, and the texts on the horizontal axis are sorted by how predictable they are. In Figure \ref{fig:heatmap_fsort}, the same texts are instead sorted by file size on both axes.
 
-The figures were produced the  \texttt{\href{https://github.com/Guy29/FYP/blob/main/Code/co_compression/stats.py}{co\_compression/stats.py}} script in the repository for this project. Creating the figures involved experimenting with each of 4 compression algorithm libraries (\texttt{zlib}, \texttt{lzma}, \texttt{gzip}, and \texttt{bz2}) to find the most suitable for co-compression. Since one of the functions that \texttt{stats.py} performs is to co-compress all possible pairings of texts from a set of 97, the results are serialized and saved regularly to avoid need for recalculation. The script uses the \texttt{seaborn} and \texttt{matplotlib} python libraries for generating the figures, and \texttt{pandas} is used to process and tabulate the data.
+The figures are produced in the  \texttt{\href{https://github.com/Guy29/FYP/blob/main/Code/co_compression/stats.py}{co\_compression/stats.py}} script in the repository for this project. Creating the figures involved experimenting with each of 4 compression algorithm libraries (\texttt{zlib}, \texttt{lzma}, \texttt{gzip}, and \texttt{bz2}) to find the most suitable for co-compression. Since one of the functions that \texttt{stats.py} performs is to co-compress all possible pairings of texts from a set of 97, the results are serialized and saved regularly to avoid need for recalculation. The script uses the \texttt{seaborn} and \texttt{matplotlib} python libraries for generating the figures, and \texttt{pandas} is used to process and tabulate the data.
 
-The following observations can be made based on figures \ref{fig:heatmap_ppsort} and \ref{fig:heatmap_fsort}:
+The following observations can be made based on Figures \ref{fig:heatmap_ppsort} and \ref{fig:heatmap_fsort}:
 \begin{itemize}
   \item In general, larger texts are more predictive.
   \item In general, smaller texts are more predictable.
-  \item There are a few very bright dots which do not lie along the diagonal in \ref{fig:heatmap_fsort}. These appear because the dataset includes three versions of Frankenstein which have a high similarity score with each other, as well as the texts for Romeo and Juliet, and the Complete Works of Shakespeare. For this last pair, the latter strongly predicts the former but the former only weakly predicts the latter.
+  \item There are a few very bright dots which do not lie along the diagonal in \ref{fig:heatmap_fsort}. These appear because the dataset includes three versions of Frankenstein which have a high similarity score with each other, as well as the texts for Romeo and Juliet, and the Complete Works of Shakespeare. For this last pair, the latter strongly predicts the former but the former only weakly predicts the latter. The same applies to White Nights and Notes from the Underground, where the former contains the latter.
   \item There is a strong horizontal dark line in both graphs, which represents a text that is unpredictable regardless of what other text it is paired with. On inspection, this turns out to be Don Quijote, which is in fact unlike the other texts because it is in Spanish, whereas most other texts are in English.
   \item As can be seen in \ref{fig:heatmap_ppsort}, when texts are sorted most-predictive-first on the $y$-axis and most-predictable-first on the $x$-axis, texts generally lie along the diagonal. This indicates that, within a set of texts, there is a trade-off between how predictive a text is and how predictable it is. At least part of this effect has to do with file size, as larger texts tend to contain a larger set of the possible words and expressions of a language.
   \item There is a visible pattern of strong vertical and horizontal lines in \ref{fig:heatmap_fsort} (i.e. there is a low level of noise), indicating that texts tend to be "generally predictive" or "generally predictable" within a given collection.
@@ -66,7 +66,7 @@ The following observations can be made based on figures \ref{fig:heatmap_ppsort}
 \subsection{Practical application}
 \label{subsec:co_comp_practical}
 
-As can be seen in the previous figures, it is always the case for any two pairs of texts $x$ and $y$ that "the whole is less than the sum of its parts", i.e. that $C(xy) < C(x) + C(y)$. This opens up the question of whether it is possible to obtain a better compression of $y$ by encoding only that information which it adds to $x$. If this is possible, we should expect that this information should be of the size $C(xy) - C(x)$ which, by the previous equation, is necessarily less than $C(y)$.
+As can be seen in the previous figures, it is always the case for any two pairs of texts $x$ and $y$ that "the whole is less than the sum of its parts", i.e. that $C(xy) \leq C(x) + C(y)$ (note the similarity to the triangle inequality). This opens up the question of whether it is possible to obtain a better compression of $y$ by encoding only that information which it adds to $x$. If this is possible, we should expect that this information should be of the size $C(xy) - C(x)$ which, by the previous equation, is $\leq C(y)$.
 
 Intuitively, this means that if two parties - Carol and Dave - each have a copy of the works of Shakespeare, and Carol wants to send over Romeo and Juliet, she can simply encode it by giving the range of pages on which it appears in their shared reference text, a much shorter representation than sending the actual text of Romeo and Juliet.
 
@@ -74,7 +74,7 @@ Is this possible to implement in practice? The fact that Lempel-Ziv algorithms w
 
 The \texttt{CoCompressor} class I implement is instantiated with two arguments: a reference text $r$ and a compression algorithm. Its \texttt{compress} method takes a text $t$ to compress and outputs $D(rt)$ with the prefix $D(r)$ removed, and its \texttt{decompress} method takes a text compressed in this way, prefixes it with $D(r)$ and decompresses it, reversing the process.
 
-Co-compressors instantiated in this way differ in their power depending on the choice of reference text. See figure \ref{fig:cocomp_comparison} below for a comparison of the performance of co-compressors trained on different reference texts.
+Co-compressors instantiated in this way differ in their power depending on the choice of reference text. See Figure \ref{fig:cocomp_comparison} below for a comparison of the performance of co-compressors trained on different reference texts.
 
 \begin{figure}[h]
 \centering
@@ -97,7 +97,7 @@ One strong piece of evidence against this is that, as noted above, the performan
 
 $$RCR_{MM}(MM) > RCR_t(t) \qquad \forall t \in G$$
 
-where $RCR_a(b)$ is a measure of the performance of the co-compressor trained on text $a$ when fed input $b$ (as defined in figure \ref{fig:cocomp_comparison}), and $G$ is the Project Gutenberg dataset. That is, $CC_{MM}$ is not only the most performant co-compressor on all the texts in the dataset, it is also the co-compressor that performs best on its own reference text.
+where $RCR_a(b)$ is a measure of the performance of the co-compressor trained on text $a$ when fed input $b$ (as defined in Figure \ref{fig:cocomp_comparison}), and $G$ is the Project Gutenberg dataset. That is, $CC_{MM}$ is not only the most performant co-compressor on all the texts in the dataset, it is also the co-compressor that performs best on its own reference text.
 
 This observation gives a simple way to find other good reference texts for co-compressors: one simply calculates $RCR_t(t)$ for each candidate and finds values of $t$ that yield the highest performance.
 
@@ -114,11 +114,11 @@ that is, the performance of the co-compressor relative to naive LZMA.
 \label{fig:self_compression_histogram}
 \end{figure}
 
-Figure \ref{fig:self_compression_histogram} shows how the 92600 texts in this dataset cluster in terms of their RCR. Note that the vertical axis is logarithmic. If the hypothesis that texts with a high RCR are good co-compressors, we should expect some of them to outperform Middlemarch if figure \ref{fig:cocomp_comparison} is re-plotted to include these texts.
+Figure \ref{fig:self_compression_histogram} shows how the 92600 texts in this dataset cluster in terms of their RCR. Note that the vertical axis is logarithmic. If the hypothesis that texts with a high RCR are good co-compressors, we should expect some of them to outperform Middlemarch if Figure \ref{fig:cocomp_comparison} is re-plotted to include these texts.
 
-This is, almost, what we find in figure \ref{fig:cocomp_comparison_best}. The 30 texts with the highest RCR were selected for inclusion in this plot. As can be seen here, all of these outperform naive LZMA to some degree, with Middlemarch still performing best in the median case. Since this method of measuring RCR works, it may be possible to use it to automatically construct a basis text for a co-compressor that gives a better compression ratio.
+This is, almost, what we find in Figure \ref{fig:cocomp_comparison_best}. The 30 texts with the highest RCR were selected for inclusion in this plot. As can be seen here, all of these outperform naive LZMA to some degree, with Middlemarch still performing best in the median case.
 
-\begin{figure}[h!]
+\begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{img/fig_cocomp_performance_best.png}
 \caption{The performance of instances of the \texttt{CoCompressor} class trained on 30 texts selected for their high RCR out of a set of 96200 candidate texts. Each line represents a \texttt{CoCompressor}. The value on the vertical axis is the ratio of the size of the encoding produced by naive LZMA to that produced by the \texttt{CoCompressor}, while the horizontal axis goes through possible inputs for comrpession.}
@@ -127,19 +127,28 @@ This is, almost, what we find in figure \ref{fig:cocomp_comparison_best}. The 30
 
 
 
+\subsection{Discussion}
 
+In this section I examined specializing an existing compression algorithm on a given basis text to obtain an improved method of compression, as well as what choices of basis text perform best. The method is fully implemented and usable, and there is a selection of texts which always outperform naive LZMA, with Middlemarch being the best of these, outperforming LZMA by 12\% in the median case.
 
+It is still not clear why George Eliot's Middlemarch, Edward Bulwer-Lytton's "My Novel", or William Black's Sunrise perform so well as a basis text, and one hypothesis (that it has most in common with the other texts in the initial 97-large dataset) is considered and disproved by showing that Middlemarch has a high RCR, which is a metric that considers each text on its own without reference to any other texts.
 
+In fact, Émile Gaboriau's La Vie Infernale barely makes the cut for the top 30 texts in terms of RCR and still improves on naive LZMA by 4\%, as can be seen in Figure \ref{fig:cocomp_comparison_best}, even though it is written in French. It is, however, the worst performing text in this group by a significant margin.
 
+A few avenues of investigation into this phenomenon come to mind, all of the form of performing some transformation on a high-performing basis text and measuring its performance after the transformation. For example, one may perform a caesar shift operation on the text of Middlemarch, or use a translation of it in a different language, or either truncate it or add some padding at the end to change the file size.
 
-\subsection{Conclusions and future work}
+It may also be useful to experiment with automatic basis text generation, perhaps starting with random strings and examining the distribution of their RCRs, or by iteratively probing the RCR to check which characters it is best to extend the basis text with.
+
+% Disable todo notes
+%\let\oldtodo\todo
+%\renewcommand{\todo}[2][]{}
 
 \todo[inline, color=yellow]{Idea: see if there's a chain of bootstrapping. Middlemarch compresses everything well, but is there something that compresses Middlemarch well? If so, use that as an earlier step in the bootstrapping}
 \todo[inline, color=yellow]{Idea: how well does the first half of Middlemarch compress the second half? If the resulting compression is short enough, this facilitates bootstrapping even more: use part 1 to compress part 2, use the total to compress another text. You could also do it in more splits.}
 \todo[inline, color=yellow]{Idea: co-compressors take compressors as one of their initializers, but they are themselves compressors. Is there any use in stacking them?}
 \todo[inline, color=yellow]{Idea: try to add some noise to a compressed version of something and see if it decompresses into anything}
-\todo[inline, color=yellow]{Idea: can you automatically generate a text ex nihilo that will be a good co-compressor using RCR as a metric?}
-\todo[inline, color=yellow]{Potential explanation for good co-compressors: file size has sweet spots. There is a repeated pattern of performance getting worse and then suddenly better as file size grows, investigate.}
 \todo[inline, color=yellow]{Idea: if the \texttt{CoCompressor} class takes a compression algorithm and improves it, can this method be used recursively on itself (starting with some very naive compression) to get something that performs significantly better?}
-\todo[inline, color=yellow]{Why Middlemarch??}
 \todo[inline, color=yellow]{Idea for practical compression: start compressed file by indicating what you want to use as a basis text, then give compressed version. Potentially, stack these: if you need basis A to get B and basis B to get C, have the file format allow passing both B and C using basis A.}
+
+% Re-enable todo notes
+%\let\todo\oldtodo

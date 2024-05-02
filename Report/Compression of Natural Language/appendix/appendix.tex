@@ -1,0 +1,61 @@
+\chapter{Appendix}
+
+The material below was prepared for this report but in the end I opted against its inclusion in the main body. It is presented here instead for curiosity.
+
+\section*{Compression techniques and algorithms}
+
+A variety of compression algorithms are in use today, many of which have been applied to natural language.
+
+\textcite{Mahoney2011} has compiled a document which lists many compression program benchmarks on the \texttt{enwik9} challenge, along with the algorithms and techniques used by each. I touch briefly on each of these below.
+
+\subsection*{Lempel Ziv and its variations}
+These include the original LZ77 \autocite{Ziv1977} and LZ78 \autocite{Ziv1978} algorithms.
+
+\subsubsection*{LZ77}
+
+The first (LZ77) works by replacing repeated substrings inside a larger string with a reference to their first occurrence, indicated by a distance D from the current position at which that occurrence starts and the length L of characters that should be copied from that offset.
+
+For example, the underlined part of the string “CC\textbf{BAABABBBA\underline{B}}\underline{AABABBBAB}BABB” could be represented by (D=9, L=10), indicating that the beginning of the string “CCBAABABBBA” is followed by a 10-character long sequence which is copied from an offset that starts 9 characters back (indicated above in bold).
+
+\subsubsection*{LZ78}
+
+The second algorithm (LZ78) works by incrementally building up a dictionary of previously seen substrings, each composed of a pair of (substring seen even earlier in the text, plus one additional character).
+
+For example, the string “AABABBBABAABABBBABBABB” would be divided into the sections
+
+\begin{center}
+\textbf{A}|A\textbf{B}|AB\textbf{B}|\textbf{B}|AB\textbf{A}|ABA\textbf{B}|B\textbf{B}|ABB\textbf{A}|BB
+\end{center}
+
+each of which is a previously seen substring plus one additional character (marked in bold). If the sections are numbered 1, 2, 3, etc., the whole string can be abbreviated to
+
+\begin{center}
+\textbf{A}|1\textbf{B}|2\textbf{B}|0\textbf{B}|2\textbf{A}|5\textbf{B}|4\textbf{B}|3\textbf{A}|7
+\end{center}
+
+In this representation, 1B simply means “the contents of section 1, plus a B”.
+
+
+\subsection*{Symbol Ranking}
+The SR family of algorithms each keep a ranking of potential symbols, usually as a probability density function. For example, it could estimate a 0.1 probability that a randomly chosen letter is “e” and a 0.01 probability that it is “j”, and consequently assign “e” a shorter code.
+
+This can be done in a rolling fashion where the encoder will update the ranking of the symbols based on how frequent they have been in the text in a sliding window ending at the current symbol, and similarly the decoder will update its own ranking and codebook identically as it is decoding the text. In this case, the codebook keeps changing throughout the text, but both encoder and decoder can construct identical ones based on the text seen so far. 
+
+\subsection*{Prediction by Partial Matching}
+PPM is a SR-based algorithm augmented by conditioning the probabilities of symbols on their “context”, consisting for example of the last n characters read.
+
+If the algorithm has so far read the symbols “aard”, for example, it may estimate a 0.9 probability of the next symbol being “v” and a 0.01 probability of the next symbol being “x”. Based on these estimates, it assigns each of the characters “v” and “x” codes of lengths that correspond to how surprising they would be and will encode the actually observed character using that code.
+
+In decompression, an identical predictor will read the encoded text, create the same codebook, and then use the recorded symbol code to reconstruct the text. \autocite{Fenwick1998}
+
+\subsection*{Burrows Wheeler Transform}
+This algorithm, due to Michael Burrows and David Wheeler \autocite{Burrows1994} acts as an aid to other algorithms which perform better when fed data with runs of repeated characters. The algorithm outputs a reversible permutation of the characters of a string which contains more such runs.
+
+\subsection*{Dynamic Markov Coding}
+Created by Cormack and Horspool \autocite{Cormack1987}. As with SR and PPM, this method of compression uses a predictor which assigns probabilities to potential next tokens, as well as arithmetic coding to assign shorter codes to more likely tokens. Unlike SR and PPM, this method compresses the input one bit at a time, rather than one byte at a time.
+
+\subsection*{Context Mixing}
+Context mixing uses multiple predictors, each using a different context (or features of the text) and each producing its own probability distribution for the next symbol in its input, and combines these probability distributions through one of many possible averaging methods (e.g. linear, logistic) into a unified distribution which is often closer to the true distribution. This results in decoders which are less “surprised” by the next received symbol and which have accordingly assigned it a shorter code. To aid accuracy, CM is implemented in an “adaptive” way, meaning that the weights assigned to each sub-model’s predictions are re-evaluated based on how accurate they’ve been so far. \autocite{Mahoney2005}
+
+\subsection*{Long Short-Term Memory and Transformers}
+LSTMs are a type of recurrent neural network which is fed its previous output as one of its inputs and which maintains an internal state indicating which of its previously seen inputs are relevant to future outputs. Using the attention mechanism, transformers can similarly select relevant parts of an input sequence as context for the part being encoded. Because of their ability to maintain context information, LSTMs and transformers are particularly suited for sequence prediction and so form the basis of another type of predictive coding.

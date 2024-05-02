@@ -7,7 +7,7 @@ While n-gram language models are very simple and easy to train, they are limited
 
 For RNNs, this is accomplished by having the network's previous outputs act as additional inputs when it observes a new symbol, giving it a simple form of memory. An improvement on this model is LSTMs, which are a subtype of RNNs that can learn to select relevant information to keep within its memory, and which generally outperform simple RNNs. Lastly, transformer-based LLMs use an attention mechanism to weight the relative importance of all words in the input data when making a prediction.
 
-In this section I perform simple experiments with one simple RNN and one LSTM, once again subclassing the \texttt{Predictor} class and plugging it (as well as an entropy coding) into a \texttt{Compressor}. The code for this section can be found at \texttt{\href{https://github.com/Guy29/FYP/blob/main/Code/machine_learning}{Code/machine\_learning}}.
+In this section I perform simple experiments with one simple RNN and one LSTM. To do this, I create a subclass of \texttt{Predictor} named \texttt{NNPredictor}, which is a predictor that uses a neural network to learn regularities in text. \texttt{RNNPredictor} and \texttt{LSTMPredictor} classes are then created as subclasses of \texttt{NNPredictor}, each specifying its architecture. These are then plugged (along with entropy codings) into \texttt{Compressor} objects. The code for this section can be found at \texttt{\href{https://github.com/Guy29/FYP/blob/main/Code/machine_learning}{Code/machine\_learning}}.
 
 As before, it is possible to feed the \texttt{decode} method noise to see what regularities the model has learned about.
 
@@ -27,6 +27,8 @@ My implementation of these models was unfortunately too slow to be practicable o
 
 \subsection{Discussion}
 
-\todo[inline, color=yellow]{Mention autoencoders and latent spaces}
+The recent developments in work with LLMs indicate that the use of neural network for the task of text prediction is probably the most powerful existing tool, prompting this experiment. The major advantage in using a NN model for this task is that it is able to self-select bits of context which it considers relevant. Unfortunately, I underestimate the amount of time and computing resources required to sufficiently train a model to a point where it consistently produces words.
 
-\todo[inline, color=yellow]{Write about potential use of LLMs, at least in future work subsection}
+For future work, it may be useful to use a pre-trained model to attempt the same task, either locally using a tool like \href{https://ollama.com/}{ollama}, or remotely using the OpenAI API.
+
+Another potential avenue of investigation would be the use of autoencoders. An autoencoder is a neural network which is trained to output the same data it is given as input. As input data propagates through the network, it passes through two sets of layers, the first decreasing in size, and the second increasing, forming a bottleneck in the middle. Because of this architecture, as the network is trained it learns an efficient coding for the data it is fed and uses that encoding at the bottleneck, the previous stage acting as an encoder and the following stage acting as a decoder. Because of this familiar architecture, it may be possible to train an autoencoder on English sentences for example, and use the encoding it learns to compress text.

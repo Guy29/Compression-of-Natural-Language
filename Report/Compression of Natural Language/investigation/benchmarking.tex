@@ -1,6 +1,6 @@
 \section{Benchmarking compression algorithms}
 
-For a rough bound on what's practically possible given commonly used tools, I start by analyzing the performance of various existing non-text-specific compression algorithms on the Project Gutenberg dataset. The result of this benchmarking is displayed in table \ref{tab:compalg_benchmarks}.
+For a rough bound on what's practically possible given commonly used tools, I start by analyzing the performance of various existing non-text-specific compression algorithms on the Project Gutenberg dataset. The result of this benchmarking is displayed in Table \ref{tab:compalg_benchmarks}.
 
 \begin{table}[ht]
 \centering
@@ -24,3 +24,6 @@ For a rough bound on what's practically possible given commonly used tools, I st
 The best performing compression algorithm is the Lempel–Ziv–Markov chain algorithm (LZMA), with a compression ratio of 3.745. Given that the vast majority of characters in Gutenberg texts are represented in a single byte (except for unicode characters), this compression method indicates that, at most, each character in these texts contains on average 8/3.745 = 2.14 bits of information.
 
 This figure is obtained empirically and establishes an upper bound on the amount of information per character in English text, but how do we establish the actual amount of information per character and thereby estimate the best compression ratio that can be hoped for? In other words, how do we calculate the entropy of English text?
+
+%\input{introduction/known_results}
+\todo[inline, color=yellow]{Potentially mention Hutter Prize compression benchmarks, see "known results" file}
